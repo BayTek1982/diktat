@@ -242,7 +242,7 @@ $('micBtn').onclick=()=>{
 /* ---------- Korrektur ---------- */
 document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modes button').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m});
 const tasks={
-  fehler:'Korrigiere nur Rechtschreibung, Grammatik, Groß-/Kleinschreibung und Zeichensetzung. Ändere Wortwahl und Inhalt nicht. Entferne offensichtliche Diktierfehler (doppelte Wörter, Füllwörter wie „äh“, „ähm“).',
+  fehler:'Korrigiere Rechtschreibung, Grammatik, Satzbau, Groß-/Kleinschreibung und Zeichensetzung, sodass korrektes Deutsch entsteht. Ändere den Inhalt nicht und formuliere nur so viel um wie nötig. Entferne offensichtliche Diktierfehler (doppelte Wörter, Füllwörter wie „äh“, „ähm“).',
   glatt:'Formuliere den Text flüssig und gut lesbar, korrigiere alle Fehler. Inhalt und Ton (Du/Sie) bleiben gleich.',
   kurz:'Fasse den Text kürzer und klarer, ohne wichtige Informationen zu verlieren. Fehlerfrei.',
   mail:'Mache daraus eine fertige, freundliche E-Mail mit Anrede und Grußformel. Behalte Du oder Sie aus dem Text bei. Keine Betreffzeile, kein Platzhalter-Name.',
@@ -255,7 +255,7 @@ function localFix(s){
 }
 function showFixed(txt,note){
   fixed=txt; out.textContent=txt; out.classList.toggle('empty',!txt);
-  $('changes').textContent=note||''; $('copyFix').disabled=!txt; $('applyBtn').disabled=!txt;
+  $('changes').textContent=note||'';$('changes').style.color=''; $('copyFix').disabled=!txt; $('applyBtn').disabled=!txt;
 }
 $('fixBtn').onclick=async()=>{
   const src=ta.value.trim();
@@ -273,13 +273,13 @@ $('fixBtn').onclick=async()=>{
           messages:[{role:'user',content:src}]})});
       const j=await r.json();
       if(!r.ok){
-        const msg=(j&&j.error&&j.error.type)||'';
-        throw new Error(r.status===401?'Schlüssel ungültig – bitte prüfen.':r.status===429?'Zu viele Anfragen – kurz warten.':msg.includes('credit')||r.status===400&&JSON.stringify(j).includes('credit')?'Guthaben leer – bitte aufladen.':'KI-Fehler ('+r.status+').');
+        const raw=(j&&j.error&&j.error.message)||'';
+        throw new Error(r.status===401?'Schlüssel ungültig – bitte prüfen.':r.status===429?'Zu viele Anfragen – kurz warten.':/credit|balance/i.test(raw)?'Guthaben leer – bitte bei Anthropic „Abrechnung einrichten“ und aufladen.':'KI-Fehler '+r.status+': '+raw);
       }
       const t=(j.content||[]).map(c=>c.text||'').join('').trim();
       showFixed(t,'✓ Mit KI korrigiert – prüfe kurz und kopiere dann.');
     }catch(e){
-      showFixed(localFix(src),'⚠ '+(e.message||'KI nicht erreichbar.')+' Einfache Korrektur verwendet.');
+      showFixed(localFix(src),'⚠ '+(e&&e.message&&e.message!=='Failed to fetch'?e.message:'KI nicht erreichbar (Verbindung blockiert).')+' – nur einfache Korrektur gemacht.');$('changes').style.color='var(--accent)';
     }finally{btn.disabled=false;btn.innerHTML='🪄 Text korrigieren'}
     return;
   }
