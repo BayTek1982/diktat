@@ -120,7 +120,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
     <!-- Korrektur -->
     <section class="tile full" style="--c:var(--gold)">
       <div class="tag">03 · Korrektur</div>
-      <div class="hint" style="margin:0 0 10px">Korrigiert Satzanfänge, Satzzeichen, Leerzeichen, doppelte Wörter und Füllwörter („äh“, „ähm“).</div>
+      <div class="hint" style="margin:0 0 10px">Prüft Rechtschreibung, Grammatik und Zeichensetzung (LanguageTool) und entfernt Füllwörter („äh“, „ähm“). Der Text wird dafür kurz an LanguageTool gesendet.</div>
       <div class="row" style="margin-top:0;margin-bottom:10px">
         <button class="btn gold big" id="fixBtn">🪄 Text korrigieren</button>
       </div>
@@ -245,7 +245,22 @@ $('fixBtn').onclick=async()=>{
   const src=ta.value.trim();
   if(!src){toast('Erst etwas diktieren ✋');return}
   const btn=$('fixBtn');
-  if(!sample){showFixed(localFix(src),'✓ Korrigiert – prüfe kurz und kopiere dann.');return}
+  if(!sample){
+    btn.disabled=true;btn.innerHTML='<span class="spin"></span> Prüfe …';
+    try{
+      const body=new URLSearchParams({text:localFix(src),language:'de-DE'});
+      const r=await fetch('https://api.languagetool.org/v2/check',{method:'POST',body});
+      if(!r.ok) throw 0;
+      const j=await r.json();
+      let t=localFix(src), n=0;
+      const ms=(j.matches||[]).filter(m=>m.replacements&&m.replacements.length).sort((a,b)=>b.offset-a.offset);
+      for(const m of ms){t=t.slice(0,m.offset)+m.replacements[0].value+t.slice(m.offset+m.length);n++}
+      showFixed(t, n? '✓ '+n+' Korrektur'+(n>1?'en':'')+' gemacht – prüfe kurz und kopiere dann.' : '✓ Keine Fehler gefunden. Hinweis: Satzbau wird nicht umgeschrieben – dafür die KI-Version im Claude-Artefakt nutzen.');
+    }catch(e){
+      showFixed(localFix(src),'Online-Prüfung nicht erreichbar – nur einfache Korrektur gemacht.');
+    }finally{btn.disabled=false;btn.innerHTML='🪄 Text korrigieren'}
+    return;
+  }
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Korrigiere …';
   out.classList.remove('empty');out.textContent='';$('changes').textContent='';
   const prompt='Du bist ein deutscher Korrektor für diktierte Texte.\nAufgabe: '+tasks[mode]+'\nAntworte AUSSCHLIESSLICH mit dem fertigen Text – keine Einleitung, keine Erklärung, keine Anführungszeichen.\n\nTEXT:\n'+src;
