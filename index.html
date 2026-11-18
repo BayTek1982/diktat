@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bayazit Diktiergerät</title>
+<meta name="theme-color" content="#0b0f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Diktat">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23ff4d6d'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle'%3E🎙%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f14; --panel:#121821; --panel2:#18202b; --line:#243041; --text:#e6edf5; --muted:#8a99ad;
+  --accent:#ff4d6d; --accent2:#22d3a6; --gold:#f5b942; --blue:#4da3ff;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+[data-theme="light"]{
+  --bg:#f3f5f8; --panel:#ffffff; --panel2:#eef1f6; --line:#d8dee8; --text:#121821; --muted:#5d6b80;
+  --shadow:0 8px 24px rgba(20,30,50,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:18px 14px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff8a5c);display:grid;place-items:center;box-shadow:var(--shadow)}
+.logo svg{width:20px;height:20px}
+h1{font-family:"JetBrains Mono",monospace;font-size:18px;margin:0;letter-spacing:.5px}
+.sub{font-size:12px;color:var(--muted);font-family:"JetBrains Mono",monospace}
+.iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;padding:8px 12px;font:600 13px Inter;cursor:pointer}
+.grid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:820px){.grid{grid-template-columns:1fr 1fr}.full{grid-column:1/-1}}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.tile::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--c,var(--accent))}
+.tag{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:1.5px;color:var(--c,var(--accent));text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.tag span.count{color:var(--muted);letter-spacing:0;text-transform:none}
+/* Aufnahme */
+.rec{display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 0 4px}
+.mic{width:110px;height:110px;border-radius:50%;border:none;cursor:pointer;background:radial-gradient(circle at 35% 30%,#ff7a90,var(--accent));color:#fff;display:grid;place-items:center;box-shadow:0 0 0 0 rgba(255,77,109,.6);transition:transform .15s}
+.mic:active{transform:scale(.96)}
+.mic svg{width:44px;height:44px}
+.mic.on{animation:pulse 1.4s infinite;background:radial-gradient(circle at 35% 30%,#ff9aa9,#e0244a)}
+.mic:disabled{opacity:.4;cursor:not-allowed;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,77,109,.55)}70%{box-shadow:0 0 0 26px rgba(255,77,109,0)}100%{box-shadow:0 0 0 0 rgba(255,77,109,0)}}
+.status{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);text-align:center;min-height:18px}
+.status b{color:var(--accent)}
+.timer{font-family:"JetBrains Mono",monospace;font-size:28px;font-weight:700}
+.live{min-height:22px;font-style:italic;color:var(--muted);text-align:center;font-size:14px;padding:0 6px}
+.hint{font-size:12.5px;color:var(--muted);line-height:1.5;background:var(--panel2);border-radius:12px;padding:10px 12px;margin-top:6px}
+.hint code{font-family:"JetBrains Mono",monospace;color:var(--text);background:var(--bg);padding:1px 6px;border-radius:6px;font-size:11.5px}
+/* Text */
+textarea{width:100%;min-height:220px;resize:vertical;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;font:16px/1.55 Inter,sans-serif;outline:none}
+textarea:focus{border-color:var(--blue)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{border:none;border-radius:11px;padding:11px 14px;font:600 14px Inter;cursor:pointer;display:inline-flex;align-items:center;gap:7px;color:#fff;background:var(--blue)}
+.btn.green{background:var(--accent2);color:#06281f}
+.btn.gold{background:var(--gold);color:#2a1d00}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.big{flex:1;justify-content:center;padding:14px;font-size:15px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.seg button{border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:999px;padding:7px 12px;font:600 12.5px Inter;cursor:pointer}
+.seg button.on{background:var(--gold);color:#2a1d00;border-color:var(--gold)}
+.out{white-space:pre-wrap;min-height:120px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;font:16px/1.55 Inter,sans-serif}
+.out.empty{color:var(--muted);font-style:italic}
+.changes{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--accent2);color:#06281f;font-weight:700;padding:11px 18px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:9;box-shadow:var(--shadow)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:10;padding:16px}
+.modal.show{display:grid}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;max-width:340px;width:100%}
+.modal h3{margin:0 0 8px;font-family:"JetBrains Mono",monospace;font-size:15px}
+.modal p{margin:0 0 14px;color:var(--muted);font-size:14px}
+.spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);font-family:"JetBrains Mono",monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+      <div><h1>DIKTIERGERÄT</h1><div class="sub">Bayazit · Sprechen · Korrigieren · Kopieren</div></div>
+    </div>
+    <button class="iconbtn" id="themeBtn" title="Hell/Dunkel umschalten">☀️ Hell</button>
+  </header>
+
+  <div class="grid">
+    <!-- Aufnahme -->
+    <section class="tile" style="--c:var(--accent)">
+      <div class="tag">01 · Aufnahme</div>
+      <div class="rec">
+        <div class="timer" id="timer">00:00</div>
+        <button class="mic" id="micBtn" aria-label="Aufnahme starten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <div class="status" id="status">Verbinde Mikrofon …</div>
+        <div class="live" id="live"></div>
+      </div>
+      <div class="hint" id="hint">
+        <b>Sprachbefehle:</b> <code>Punkt</code> <code>Komma</code> <code>Fragezeichen</code> <code>Ausrufezeichen</code> <code>Doppelpunkt</code> <code>neue Zeile</code> <code>neuer Absatz</code>
+      </div>
+    </section>
+
+    <!-- Text -->
+    <section class="tile" style="--c:var(--blue)">
+      <div class="tag">02 · Dein Text <span class="count" id="count">0 Wörter</span></div>
+      <textarea id="text" placeholder="Hier erscheint dein diktierter Text. Du kannst auch tippen oder das Mikrofon deiner Handy-Tastatur benutzen."></textarea>
+      <div class="row">
+        <button class="btn big green" id="copyRaw">📋 Text kopieren</button>
+        <button class="btn danger" id="clearBtn">🗑 Löschen</button>
+      </div>
+    </section>
+
+    <!-- Korrektur -->
+    <section class="tile full" style="--c:var(--gold)">
+      <div class="tag">03 · Korrektur</div>
+      <div class="hint" style="margin:0 0 10px">Korrigiert Satzanfänge, Satzzeichen, Leerzeichen, doppelte Wörter und Füllwörter („äh“, „ähm“).</div>
+      <div class="row" style="margin-top:0;margin-bottom:10px">
+        <button class="btn gold big" id="fixBtn">🪄 Text korrigieren</button>
+      </div>
+      <div class="out empty" id="out">Der korrigierte Text erscheint hier.</div>
+      <div class="changes" id="changes"></div>
+      <div class="row">
+        <button class="btn big green" id="copyFix" disabled>📋 Korrigierten Text kopieren</button>
+        <button class="btn ghost" id="applyBtn" disabled>⬆ Übernehmen</button>
+      </div>
+    </section>
+  </div>
+  <footer>Kompass Dark · Bayazit Diktiergerät</footer>
+</div>
+
+<div class="toast" id="toast">Kopiert ✓</div>
+<div class="modal" id="modal"><div class="box">
+  <h3>Text löschen?</h3><p>Der gesamte Text und die Korrektur werden entfernt.</p>
+  <div class="row"><button class="btn ghost" id="mNo">Abbrechen</button><button class="btn" style="background:var(--accent)" id="mYes">Löschen</button></div>
+</div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const ta=$('text'), out=$('out');
+let mode='fehler', fixed='', dict=null, sample=null, listening=false, t0=0, tick=null;
+
+/* ---------- Speicher (nur dieser Browser) ---------- */
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+ta.value=store.get('diktat_text')||'';
+/* ---------- Hell/Dunkel ---------- */
+function setTheme(t){document.documentElement.dataset.theme=t;$('themeBtn').textContent=t==='light'?'🌙 Dunkel':'☀️ Hell';store.set('diktat_theme',t)}
+setTheme(store.get('diktat_theme')||'dark');
+$('themeBtn').onclick=()=>setTheme(document.documentElement.dataset.theme==='light'?'dark':'light');
+
+/* ---------- Zähler ---------- */
+function upd(){const w=ta.value.trim()?ta.value.trim().split(/\s+/).length:0;$('count').textContent=w+' Wörter · '+ta.value.length+' Zeichen';store.set('diktat_text',ta.value)}
+ta.addEventListener('input',upd);upd();
+
+/* ---------- Sprachbefehle ---------- */
+function commands(s){
+  const map=[[/\s*\bneuer absatz\b\s*/gi,'\n\n'],[/\s*\bneue zeile\b\s*/gi,'\n'],[/\s*\bfragezeichen\b/gi,'?'],[/\s*\bausrufezeichen\b/gi,'!'],
+   [/\s*\bdoppelpunkt\b/gi,':'],[/\s*\bsemikolon\b/gi,';'],[/\s*\bkomma\b/gi,','],[/\s*\bpunkt\b/gi,'.'],[/\s*\bbindestrich\b\s*/gi,'-']];
+  map.forEach(([r,v])=>s=s.replace(r,v));
+  return s;
+}
+function capitalize(s){return s.replace(/(^|[.!?]\s+|\n\s*)([a-zäöü])/g,(m,a,b)=>a+b.toUpperCase())}
+function appendText(phrase){
+  let p=commands(phrase.trim()); if(!p) return;
+  let cur=ta.value;
+  const needsSpace=cur && !/[\s\n]$/.test(cur) && !/^[.,!?:;\n]/.test(p);
+  let joined=cur+(needsSpace?' ':'')+p;
+  ta.value=capitalize(joined); upd(); ta.scrollTop=ta.scrollHeight;
+}
+
+/* ---------- Diktat ---------- */
+function setStatus(h){$('status').innerHTML=h}
+function startTimer(){t0=Date.now();clearInterval(tick);tick=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500)}
+function stopTimer(){clearInterval(tick)}
+function noDictation(){
+  $('micBtn').disabled=true;
+  setStatus('Mikrofon hier nicht verfügbar');
+  $('hint').innerHTML='📱 <b>Am Handy:</b> Tippe ins Textfeld und nutze das <b>Mikrofon-Symbol deiner Tastatur</b> – sag dort „Punkt“, „Komma“ usw. Die Korrektur und das Kopieren funktionieren ganz normal.<br>💻 Das große Mikrofon funktioniert im <b>Chrome-Browser</b> oder in der <b>Claude-Desktop-App</b>.';
+}
+/* Spracherkennung des Browsers (Chrome, Edge, Samsung Internet, Safari) */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null, wantOn=false;
+function setOn(on){
+  listening=on; $('micBtn').classList.toggle('on',on);
+  if(on){setStatus('<b>● Aufnahme läuft</b> – tippe zum Stoppen');startTimer()}
+  else{stopTimer();$('live').textContent=''}
+}
+if(!SR){
+  $('micBtn').disabled=true;
+  setStatus('Spracherkennung in diesem Browser nicht verfügbar');
+  $('hint').innerHTML='📱 Bitte die Seite in <b>Chrome</b> (Android) oder <b>Safari</b> (iPhone) öffnen – oder ins Textfeld tippen und das <b>Mikrofon deiner Tastatur</b> nutzen.';
+}else{
+  setStatus('Tippe aufs Mikrofon zum Starten');
+  rec=new SR(); rec.lang='de-DE'; rec.continuous=true; rec.interimResults=true;
+  rec.onresult=e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const r=e.results[i];
+      if(r.isFinal) appendText(r[0].transcript); else interim+=r[0].transcript;
+    }
+    $('live').textContent=interim;
+  };
+  rec.onerror=e=>{
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){wantOn=false;setOn(false);setStatus('Mikrofon-Zugriff abgelehnt – in den Browser-Einstellungen erlauben')}
+    else if(e.error==='no-speech'){/* weiter zuhören */}
+    else if(e.error==='network'){wantOn=false;setOn(false);setStatus('Keine Internetverbindung für die Spracherkennung')}
+  };
+  rec.onend=()=>{ // Handy-Browser beenden oft nach einer Pause – automatisch weiter
+    if(wantOn){try{rec.start()}catch(_){}}
+    else{setOn(false);setStatus('Gestoppt – tippe zum Weitersprechen')}
+  };
+}
+$('micBtn').onclick=()=>{
+  if(!rec) return;
+  if(wantOn){wantOn=false;try{rec.stop()}catch(_){};return}
+  wantOn=true;
+  try{rec.start();setOn(true)}catch(e){setStatus('Start nicht möglich – bitte nochmal tippen');wantOn=false}
+};
+
+/* ---------- Korrektur ---------- */
+document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modes button').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m});
+const tasks={
+  fehler:'Korrigiere nur Rechtschreibung, Grammatik, Groß-/Kleinschreibung und Zeichensetzung. Ändere Wortwahl und Inhalt nicht. Entferne offensichtliche Diktierfehler (doppelte Wörter, Füllwörter wie „äh“, „ähm“).',
+  glatt:'Formuliere den Text flüssig und gut lesbar, korrigiere alle Fehler. Inhalt und Ton (Du/Sie) bleiben gleich.',
+  kurz:'Fasse den Text kürzer und klarer, ohne wichtige Informationen zu verlieren. Fehlerfrei.',
+  mail:'Mache daraus eine fertige, freundliche E-Mail mit Anrede und Grußformel. Behalte Du oder Sie aus dem Text bei. Keine Betreffzeile, kein Platzhalter-Name.',
+  formell:'Schreibe den Text förmlich und höflich in der Sie-Form, fehlerfrei.'
+};
+function localFix(s){
+  s=s.replace(/\b(äh+m?|ähm|öhm)\b[,]?\s*/gi,'').replace(/\b(\w+)\s+\1\b/gi,'$1').replace(/[ \t]+/g,' ').replace(/\s+([.,!?:;])/g,'$1').replace(/([.,!?:;])(?=[A-Za-zÄÖÜäöü])/g,'$1 ').trim();
+  s=capitalize(s); if(s && !/[.!?:]$/.test(s)) s+='.';
+  return s;
+}
+function showFixed(txt,note){
+  fixed=txt; out.textContent=txt; out.classList.toggle('empty',!txt);
+  $('changes').textContent=note||''; $('copyFix').disabled=!txt; $('applyBtn').disabled=!txt;
+}
+$('fixBtn').onclick=async()=>{
+  const src=ta.value.trim();
+  if(!src){toast('Erst etwas diktieren ✋');return}
+  const btn=$('fixBtn');
+  if(!sample){showFixed(localFix(src),'✓ Korrigiert – prüfe kurz und kopiere dann.');return}
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Korrigiere …';
+  out.classList.remove('empty');out.textContent='';$('changes').textContent='';
+  const prompt='Du bist ein deutscher Korrektor für diktierte Texte.\nAufgabe: '+tasks[mode]+'\nAntworte AUSSCHLIESSLICH mit dem fertigen Text – keine Einleitung, keine Erklärung, keine Anführungszeichen.\n\nTEXT:\n'+src;
+  try{
+    const r=await sample(prompt,{modelTier:'quick',onText:({text})=>{out.textContent=text}});
+    showFixed((r.text||'').trim(),'✓ Mit KI korrigiert – prüfe kurz und kopiere dann.');
+  }catch(e){
+    const c=e&&e.code;
+    if(c==='not_granted') sample=null;
+    showFixed(localFix(src),c==='rate_limited'?'KI gerade ausgelastet – einfache Korrektur verwendet. Später nochmal versuchen.':'KI nicht erreichbar – einfache Korrektur verwendet.');
+  }finally{btn.disabled=false;btn.innerHTML='🪄 Text korrigieren'}
+};
+$('applyBtn').onclick=()=>{ta.value=fixed;upd();toast('Übernommen ✓')};
+
+/* ---------- Kopieren ---------- */
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1600)}
+async function copy(txt){
+  if(!txt){toast('Nichts zum Kopieren');return}
+  try{await navigator.clipboard.writeText(txt);toast('Kopiert ✓')}
+  catch(e){ // Ersatzweg: markieren
+    const h=document.createElement('textarea');h.value=txt;document.body.appendChild(h);h.select();
+    let ok=false;try{ok=document.execCommand('copy')}catch(_){}
+    h.remove();toast(ok?'Kopiert ✓':'Bitte Text markieren und kopieren');
+    if(!ok){ta.focus();ta.select()}
+  }
+}
+$('copyRaw').onclick=()=>copy(ta.value.trim());
+$('copyFix').onclick=()=>copy(fixed);
+
+/* ---------- Löschen ---------- */
+$('clearBtn').onclick=()=>$('modal').classList.add('show');
+$('mNo').onclick=()=>$('modal').classList.remove('show');
+$('mYes').onclick=()=>{ta.value='';upd();showFixed('','');out.textContent='Der korrigierte Text erscheint hier.';out.classList.add('empty');$('modal').classList.remove('show')};
+</script>
+</body>
+</html>
