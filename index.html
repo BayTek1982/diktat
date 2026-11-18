@@ -120,7 +120,23 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
     <!-- Korrektur -->
     <section class="tile full" style="--c:var(--gold)">
       <div class="tag">03 · Korrektur</div>
-      <div class="hint" style="margin:0 0 10px">Prüft Rechtschreibung, Grammatik und Zeichensetzung (LanguageTool) und entfernt Füllwörter („äh“, „ähm“). Der Text wird dafür kurz an LanguageTool gesendet.</div>
+      <div class="seg" id="modes">
+        <button data-m="fehler" class="on">✔ Rechtschreibung &amp; Zeichensetzung</button>
+        <button data-m="glatt">✨ Schöner formulieren</button>
+        <button data-m="kurz">✂ Kürzer fassen</button>
+        <button data-m="mail">✉ Als E-Mail</button>
+        <button data-m="formell">👔 Förmlich (Sie)</button>
+      </div>
+      <div class="hint" id="kiInfo" style="margin:0 0 10px"></div>
+      <details id="kiBox" style="margin:0 0 10px">
+        <summary style="cursor:pointer;font:600 13px Inter;color:var(--muted)">🔑 KI-Schlüssel einstellen</summary>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+          <input id="kiKey" type="password" autocomplete="off" placeholder="sk-ant-…" style="flex:1;min-width:200px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:14px 'JetBrains Mono',monospace">
+          <button class="btn" id="kiSave">Speichern</button>
+          <button class="btn ghost" id="kiDel">Entfernen</button>
+        </div>
+        <div class="changes">Der Schlüssel wird nur in diesem Browser auf diesem Gerät gespeichert – nicht auf GitHub, nicht im Internet sichtbar.</div>
+      </details>
       <div class="row" style="margin-top:0;margin-bottom:10px">
         <button class="btn gold big" id="fixBtn">🪄 Text korrigieren</button>
       </div>
@@ -245,6 +261,29 @@ $('fixBtn').onclick=async()=>{
   const src=ta.value.trim();
   if(!src){toast('Erst etwas diktieren ✋');return}
   const btn=$('fixBtn');
+  const key=store.get('diktat_kikey');
+  if(key){
+    btn.disabled=true;btn.innerHTML='<span class="spin"></span> KI korrigiert …';
+    out.classList.remove('empty');out.textContent='';$('changes').textContent='';
+    try{
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+        headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-haiku-5-5',max_tokens:2000,
+          system:'Du bist ein deutscher Korrektor für diktierte Texte. Aufgabe: '+tasks[mode]+' Antworte AUSSCHLIESSLICH mit dem fertigen Text – keine Einleitung, keine Erklärung, keine Anführungszeichen.',
+          messages:[{role:'user',content:src}]})});
+      const j=await r.json();
+      if(!r.ok){
+        const msg=(j&&j.error&&j.error.type)||'';
+        throw new Error(r.status===401?'Schlüssel ungültig – bitte prüfen.':r.status===429?'Zu viele Anfragen – kurz warten.':msg.includes('credit')||r.status===400&&JSON.stringify(j).includes('credit')?'Guthaben leer – bitte aufladen.':'KI-Fehler ('+r.status+').');
+      }
+      const t=(j.content||[]).map(c=>c.text||'').join('').trim();
+      showFixed(t,'✓ Mit KI korrigiert – prüfe kurz und kopiere dann.');
+    }catch(e){
+      showFixed(localFix(src),'⚠ '+(e.message||'KI nicht erreichbar.')+' Einfache Korrektur verwendet.');
+    }finally{btn.disabled=false;btn.innerHTML='🪄 Text korrigieren'}
+    return;
+  }
+  if(mode!=='fehler'){toast('Dafür KI-Schlüssel einstellen 🔑');$('kiBox').open=true;return}
   if(!sample){
     btn.disabled=true;btn.innerHTML='<span class="spin"></span> Prüfe …';
     try{
@@ -273,6 +312,14 @@ $('fixBtn').onclick=async()=>{
     showFixed(localFix(src),c==='rate_limited'?'KI gerade ausgelastet – einfache Korrektur verwendet. Später nochmal versuchen.':'KI nicht erreichbar – einfache Korrektur verwendet.');
   }finally{btn.disabled=false;btn.innerHTML='🪄 Text korrigieren'}
 };
+function kiInfo(){
+  const k=store.get('diktat_kikey');
+  $('kiInfo').innerHTML=k?'🤖 <b>KI-Korrektur aktiv</b> – schreibt auch schiefe Sätze in gutes Deutsch um.':'Ohne KI-Schlüssel: Rechtschreib- und Grammatikprüfung (LanguageTool). Für „Schöner formulieren“, „Als E-Mail“ usw. unten den KI-Schlüssel einstellen.';
+  $('kiKey').value=k?'••••••••'+k.slice(-4):'';
+}
+$('kiSave').onclick=()=>{const v=$('kiKey').value.trim();if(!v.startsWith('sk-ant-')){toast('Schlüssel beginnt mit sk-ant-');return}store.set('diktat_kikey',v);kiInfo();$('kiBox').open=false;toast('Schlüssel gespeichert ✓')};
+$('kiDel').onclick=()=>{try{localStorage.removeItem('diktat_kikey')}catch(e){}kiInfo();toast('Schlüssel entfernt')};
+kiInfo();
 $('applyBtn').onclick=()=>{ta.value=fixed;upd();toast('Übernommen ✓')};
 
 /* ---------- Kopieren ---------- */
