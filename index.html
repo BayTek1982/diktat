@@ -47,6 +47,9 @@ h1{font-family:"JetBrains Mono",monospace;font-size:18px;margin:0;letter-spacing
 .mic.on{animation:pulse 1.4s infinite;background:radial-gradient(circle at 35% 30%,#ff9aa9,#e0244a)}
 .mic:disabled{opacity:.4;cursor:not-allowed;animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,77,109,.55)}70%{box-shadow:0 0 0 26px rgba(255,77,109,0)}100%{box-shadow:0 0 0 0 rgba(255,77,109,0)}}
+.recctl{display:none;gap:8px;justify-content:center;flex-wrap:wrap}.recctl.show{display:flex}
+.mic.paused{animation:none;background:radial-gradient(circle at 35% 30%,#ffd27a,var(--gold));color:#2a1d00}
+.speak.on{background:var(--blue);color:#fff;border-color:var(--blue)}
 .status{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);text-align:center;min-height:18px}
 .status b{color:var(--accent)}
 .timer{font-family:"JetBrains Mono",monospace;font-size:28px;font-weight:700}
@@ -101,6 +104,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
         <button class="mic" id="micBtn" aria-label="Aufnahme starten">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
         </button>
+        <div class="recctl" id="recctl"><button class="btn gold" id="pauseBtn">⏸ Pause</button><button class="btn danger" id="stopBtn">⏹ Stopp</button></div>
         <div class="status" id="status">Verbinde Mikrofon …</div>
         <div class="live" id="live"></div>
       </div>
@@ -148,6 +152,12 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
         <button class="btn big green" id="copyFix" disabled>📋 Korrigierten Text kopieren</button>
         <button class="btn ghost" id="applyBtn" disabled>⬆ Übernehmen</button>
       </div>
+      <div class="row" id="ttsRow">
+        <button class="btn ghost speak" id="speakBtn" disabled>🔊 Vorlesen</button>
+        <button class="btn ghost" id="speakStop" disabled>⏹</button>
+        <button class="btn ghost" id="speedBtn">Tempo 1×</button>
+        <button class="btn ghost" id="speakRaw">🔊 Meinen Text vorlesen</button>
+      </div>
     </section>
   </div>
   <footer>Kompass Dark · Bayazit Diktiergerät</footer>
@@ -194,8 +204,10 @@ function appendText(phrase){
 
 /* ---------- Diktat ---------- */
 function setStatus(h){$('status').innerHTML=h}
-function startTimer(){t0=Date.now();clearInterval(tick);tick=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},500)}
-function stopTimer(){clearInterval(tick)}
+let elapsed=0;
+function showTime(ms){const s=Math.floor(ms/1000);$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function startTimer(){t0=Date.now();clearInterval(tick);tick=setInterval(()=>showTime(elapsed+Date.now()-t0),500)}
+function stopTimer(){if(tick){elapsed+=Date.now()-t0}clearInterval(tick);tick=null;showTime(elapsed)}
 function noDictation(){
   $('micBtn').disabled=true;
   setStatus('Mikrofon hier nicht verfügbar');
@@ -203,12 +215,17 @@ function noDictation(){
 }
 /* Spracherkennung des Browsers (Chrome, Edge, Samsung Internet, Safari) */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let rec=null, wantOn=false;
-function setOn(on){
-  listening=on; $('micBtn').classList.toggle('on',on);
-  if(on){setStatus('<b>● Aufnahme läuft</b> – tippe zum Stoppen');startTimer()}
-  else{stopTimer();$('live').textContent=''}
+let rec=null, wantOn=false, phase='idle'; // idle | rec | pause
+function setPhase(p){
+  phase=p; listening=p==='rec';
+  const m=$('micBtn'); m.classList.toggle('on',p==='rec'); m.classList.toggle('paused',p==='pause');
+  $('recctl').classList.toggle('show',p!=='idle');
+  $('pauseBtn').textContent=p==='pause'?'▶ Weiter':'⏸ Pause';
+  if(p==='rec'){setStatus('<b>● Aufnahme läuft</b> – Pause oder Stopp drücken');startTimer()}
+  else if(p==='pause'){stopTimer();$('live').textContent='';setStatus('⏸ Pausiert – „Weiter“ drücken zum Weitersprechen')}
+  else{stopTimer();$('live').textContent='';setStatus(elapsed?'Gestoppt – tippe aufs Mikrofon für eine neue Aufnahme':'Tippe aufs Mikrofon zum Starten')}
 }
+function setOn(on){setPhase(on?'rec':'idle')}
 if(!SR){
   $('micBtn').disabled=true;
   setStatus('Spracherkennung in diesem Browser nicht verfügbar');
@@ -225,21 +242,56 @@ if(!SR){
     $('live').textContent=interim;
   };
   rec.onerror=e=>{
-    if(e.error==='not-allowed'||e.error==='service-not-allowed'){wantOn=false;setOn(false);setStatus('Mikrofon-Zugriff abgelehnt – in den Browser-Einstellungen erlauben')}
-    else if(e.error==='no-speech'){/* weiter zuhören */}
-    else if(e.error==='network'){wantOn=false;setOn(false);setStatus('Keine Internetverbindung für die Spracherkennung')}
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){wantOn=false;setPhase('idle');setStatus('Mikrofon-Zugriff abgelehnt – in den Browser-Einstellungen erlauben')}
+    else if(e.error==='network'){wantOn=false;setPhase('idle');setStatus('Keine Internetverbindung für die Spracherkennung')}
   };
-  rec.onend=()=>{ // Handy-Browser beenden oft nach einer Pause – automatisch weiter
+  rec.onend=()=>{ // Handy-Browser beenden oft nach einer Sprechpause – automatisch weiter
     if(wantOn){try{rec.start()}catch(_){}}
-    else{setOn(false);setStatus('Gestoppt – tippe zum Weitersprechen')}
   };
 }
+function recStart(){wantOn=true;try{rec.start()}catch(_){};setPhase('rec')}
+function recHalt(){wantOn=false;try{rec.stop()}catch(_){}}
 $('micBtn').onclick=()=>{
   if(!rec) return;
-  if(wantOn){wantOn=false;try{rec.stop()}catch(_){};return}
-  wantOn=true;
-  try{rec.start();setOn(true)}catch(e){setStatus('Start nicht möglich – bitte nochmal tippen');wantOn=false}
+  if(phase==='idle'){elapsed=0;showTime(0);stopSpeak();recStart()}
+  else if(phase==='rec'){recHalt();setPhase('pause')}
+  else{stopSpeak();recStart()}
 };
+$('pauseBtn').onclick=()=>{ if(phase==='rec'){recHalt();setPhase('pause')} else if(phase==='pause'){stopSpeak();recStart()} };
+$('stopBtn').onclick=()=>{ recHalt(); setPhase('idle') };
+
+/* ---------- Vorlesen ---------- */
+const TTS=window.speechSynthesis;
+let rate=1, speakingWhich=null;
+function deVoice(){const v=(TTS&&TTS.getVoices())||[];return v.find(x=>/de[-_]DE/i.test(x.lang)&&/google|natural|neural/i.test(x.name))||v.find(x=>/^de/i.test(x.lang))||null}
+function updSpeakBtns(){
+  const on=speakingWhich&&TTS&&(TTS.speaking||TTS.paused);
+  $('speakBtn').classList.toggle('on',speakingWhich==='fix'&&on);
+  $('speakBtn').textContent=speakingWhich==='fix'&&on?(TTS.paused?'▶ Weiter':'⏸ Pause'):'🔊 Vorlesen';
+  $('speakRaw').textContent=speakingWhich==='raw'&&on?(TTS.paused?'▶ Weiter':'⏸ Pause'):'🔊 Meinen Text vorlesen';
+  $('speakRaw').classList.toggle('on',speakingWhich==='raw'&&on);
+  $('speakStop').disabled=!on; $('speakBtn').disabled=!fixed;
+}
+function stopSpeak(){if(TTS){TTS.cancel()}speakingWhich=null;updSpeakBtns()}
+function speak(which,text){
+  if(!TTS){toast('Vorlesen geht in diesem Browser nicht');return}
+  if(speakingWhich===which&&(TTS.speaking||TTS.paused)){ if(TTS.paused)TTS.resume(); else TTS.pause(); setTimeout(updSpeakBtns,50); return }
+  if(!text){toast('Nichts zum Vorlesen');return}
+  if(phase==='rec'){recHalt();setPhase('pause')} // nicht sich selbst diktieren
+  TTS.cancel();
+  // in Sätze teilen – lange Texte brechen sonst bei manchen Handys ab
+  const parts=text.replace(/\n+/g,'. ').match(/[^.!?]+[.!?]*/g)||[text];
+  speakingWhich=which;
+  parts.forEach((p,i)=>{const u=new SpeechSynthesisUtterance(p.trim());u.lang='de-DE';u.rate=rate;const v=deVoice();if(v)u.voice=v;
+    if(i===parts.length-1)u.onend=()=>{speakingWhich=null;updSpeakBtns()};TTS.speak(u)});
+  setTimeout(updSpeakBtns,80);
+}
+if(TTS&&TTS.onvoiceschanged!==undefined)TTS.onvoiceschanged=()=>{};
+if(!TTS){$('ttsRow').style.display='none'}
+$('speakBtn').onclick=()=>speak('fix',fixed);
+$('speakRaw').onclick=()=>speak('raw',ta.value.trim());
+$('speakStop').onclick=stopSpeak;
+$('speedBtn').onclick=()=>{rate=rate===1?1.25:rate===1.25?0.8:1;$('speedBtn').textContent='Tempo '+String(rate).replace('.',',')+'×';if(speakingWhich)toast('Gilt ab dem nächsten Vorlesen')};
 
 /* ---------- Korrektur ---------- */
 document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#modes button').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.m});
@@ -257,7 +309,7 @@ function localFix(s){
 }
 function showFixed(txt,note){
   fixed=txt; out.textContent=txt; out.classList.toggle('empty',!txt);
-  $('changes').textContent=note||'';$('changes').style.color=''; $('copyFix').disabled=!txt; $('applyBtn').disabled=!txt;
+  $('changes').textContent=note||'';$('changes').style.color=''; $('copyFix').disabled=!txt; $('applyBtn').disabled=!txt; if(window.updSpeakBtns)updSpeakBtns();
 }
 $('fixBtn').onclick=async()=>{
   const src=ta.value.trim();
