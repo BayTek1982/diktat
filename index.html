@@ -215,6 +215,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
       <textarea id="text" placeholder="Hier erscheint dein diktierter oder gescannter Text. Du kannst auch tippen oder das Mikrofon deiner Handy-Tastatur benutzen."></textarea>
       <div class="row">
         <button class="btn big green" id="copyRaw">📋 Text kopieren</button>
+        <button class="btn" id="shareRaw">📤 Teilen</button>
         <button class="btn danger" id="clearBtn">🗑 Löschen</button>
       </div>
       <div class="row">
@@ -251,6 +252,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
       <div class="changes" id="changes"></div>
       <div class="row">
         <button class="btn big green" id="copyFix" disabled>📋 Korrigierten Text kopieren</button>
+        <button class="btn" id="shareFix" disabled>📤 Teilen</button>
         <button class="btn ghost" id="applyBtn" disabled>⬆ Übernehmen</button>
       </div>
       <div class="row" id="ttsRow">
@@ -482,7 +484,7 @@ function localFix(s){
 }
 function showFixed(txt,note){
   fixed=txt; out.textContent=txt; out.classList.toggle('empty',!txt);
-  $('changes').textContent=note||'';$('changes').style.color=''; $('copyFix').disabled=!txt; $('applyBtn').disabled=!txt; if(window.updSpeakBtns)updSpeakBtns();
+  $('changes').textContent=note||'';$('changes').style.color=''; $('copyFix').disabled=!txt; $('shareFix').disabled=!txt; $('applyBtn').disabled=!txt; if(window.updSpeakBtns)updSpeakBtns();
 }
 $('fixBtn').onclick=async()=>{
   const src=ta.value.trim();
@@ -819,6 +821,9 @@ $('tShareAll').onclick=()=>{
   if(!list.length){toast('Keine Aufgaben zum Teilen');return}
   shareIt('Meine Aufgaben','📋 Meine Aufgaben ('+new Date().toLocaleDateString('de-DE')+')\n\n'+list.map(x=>(x.done?'✅ ':'☐ ')+(x.imp?'📌 ':'')+x.text+(x.due?' (📅 '+fd(x.due)+')':'')).join('\n'));
 };
+
+$('shareRaw').onclick=()=>{const t=ta.value.trim();if(!t){toast('Nichts zum Teilen');return}shareIt('Mein Text',t)};
+$('shareFix').onclick=()=>{if(!fixed){toast('Erst korrigieren');return}shareIt('Mein Text',fixed)};
 
 /* ---------- Sicherung ---------- */
 $('bkBtn').onclick=()=>{$('bkInfo').textContent='';$('bkM').classList.add('show')};
