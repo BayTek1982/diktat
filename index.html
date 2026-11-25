@@ -97,7 +97,42 @@ input.inp:focus{border-color:var(--blue)}
 .thumbs .th{position:relative;width:74px;height:74px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--panel2);cursor:pointer}
 .thumbs .th img{width:100%;height:100%;object-fit:cover}
 .thumbs .th b{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.65);color:#fff;border-radius:99px;width:22px;height:22px;display:grid;place-items:center;font-size:12px}
-/* Notizen */
+/* Karten für Notizen + Aufgaben (gleich aufgebaut) */
+.cards{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+@media(min-width:680px){.cards{grid-template-columns:1fr 1fr}}
+@media(min-width:1100px){.cards{grid-template-columns:1fr 1fr 1fr}}
+.card{--cc:var(--blue);position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,color-mix(in srgb,var(--cc) 7%,var(--panel2)),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:14px 14px 12px 18px;box-shadow:0 6px 18px rgba(0,0,0,.18);overflow:hidden;transition:transform .15s}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--cc)}
+.card.todo-c{--cc:var(--accent2)}
+.card.pin{--cc:var(--gold);border-color:color-mix(in srgb,var(--gold) 55%,var(--line))}
+.card.done{opacity:.6}.card.done .ctext{text-decoration:line-through}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{font:600 11px "JetBrains Mono",monospace;padding:4px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chip.gold{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
+.chip.red{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.chip.green{color:var(--accent2);border-color:color-mix(in srgb,var(--accent2) 50%,var(--line))}
+.chead{display:flex;gap:12px;align-items:flex-start}
+.ck{width:30px;height:30px;flex:none;border-radius:9px;border:2px solid var(--accent2);background:transparent;cursor:pointer;display:grid;place-items:center;color:#06281f;font-weight:900;font-size:16px;margin-top:1px}
+.card.done .ck{background:var(--accent2)}
+.ctext{flex:1;min-width:0;white-space:pre-wrap;word-wrap:break-word;font-size:16px;line-height:1.5;cursor:pointer}
+.ctext.long{max-height:9em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
+.card.open .ctext.long{max-height:none;-webkit-mask-image:none;mask-image:none}
+.more{font:600 12px Inter;color:var(--cc);background:none;border:none;padding:4px 0 0;cursor:pointer;align-self:flex-start}
+.bar{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:auto;padding-top:12px}
+.bar::before{content:"";grid-column:1/-1;height:1px;background:var(--line);margin:0 0 6px}
+.bar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:54px;padding:6px 4px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:12px;font:600 11.5px Inter;cursor:pointer;transition:background .15s,border-color .15s}
+.bar button span{font-size:18px;line-height:1}
+.bar button:active{transform:scale(.97)}
+.bar button.on{border-color:var(--gold);color:var(--gold)}
+.bar button.sure{background:var(--accent);border-color:var(--accent);color:#fff}
+@media(min-width:420px) and (max-width:679px){.bar{grid-template-columns:repeat(6,1fr)}}
+/* Eingabe neue Aufgabe */
+.addrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.addrow #tNew{grid-column:1/-1}
+.addrow .datew{display:flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:0 0 0 10px}
+.addrow .datew input{border:none;background:transparent;flex:1;min-width:0;padding:11px 8px}
+@media(min-width:680px){.addrow{grid-template-columns:1fr 190px auto}.addrow #tNew{grid-column:auto}}
+/* Notizen (alt) */
 .list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .note{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px}
 .note.pin{border-color:var(--gold)}
@@ -223,7 +258,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
     <section class="tile" style="--c:var(--blue)">
       <div class="tag">📝 Notizen <span class="count" id="nCount">0</span></div>
       <input class="inp" id="nSearch" placeholder="🔍 Notizen durchsuchen …" style="width:100%">
-      <div class="list" id="nList"></div>
+      <div class="cards" id="nList"></div>
     </section>
     <section class="tile" style="--c:var(--accent2);margin-top:14px">
       <div class="tag">💾 Sicherung</div>
@@ -240,16 +275,16 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
   <div class="view" id="v-todo">
     <section class="tile" style="--c:var(--accent2)">
       <div class="tag">✅ Aufgaben <span class="count" id="tCount">0 offen</span></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <input class="inp" id="tNew" placeholder="Neue Aufgabe …" style="flex:1;min-width:180px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)">📅<input class="inp" id="tDue" type="date" title="Fällig am (optional)" style="width:150px"></label>
-        <button class="btn green" id="tAdd">＋ Hinzufügen</button>
+      <div class="addrow">
+        <input class="inp" id="tNew" placeholder="✍️ Neue Aufgabe eintippen …">
+        <label class="datew" title="Fällig am (optional)">📅<input class="inp" id="tDue" type="date"></label>
+        <button class="btn green" id="tAdd" style="justify-content:center">＋ Hinzufügen</button>
       </div>
       <div class="row" style="justify-content:space-between">
         <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px"><input type="checkbox" id="tShowDone"> Erledigte anzeigen</label>
         <button class="btn ghost" id="tClear" style="padding:7px 10px;font-size:12.5px">🧹 Erledigte löschen</button>
       </div>
-      <div class="list" id="tList"></div>
+      <div class="cards" id="tList"></div>
     </section>
   </div>
 
@@ -265,6 +300,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
 <div class="modal" id="editM"><div class="box" style="max-width:560px">
   <h3>Notiz bearbeiten</h3>
   <textarea id="editTa" style="min-height:240px"></textarea>
+  <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px"><input type="checkbox" id="ePin"> 📌 Anheften (bleibt oben)</label>
   <div class="row"><button class="btn ghost" id="eNo">Abbrechen</button><button class="btn" id="eYes">Speichern</button></div>
 </div></div>
 <div class="modal" id="todoM"><div class="box" style="max-width:480px">
@@ -275,7 +311,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
     <input class="inp" id="tmDue" type="date" style="flex:1;min-width:150px">
     <button class="btn ghost" id="tmNoDue" style="padding:9px 10px">Kein Datum</button>
   </div>
-  <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px"><input type="checkbox" id="tmImp"> ⭐ Wichtig</label>
+  <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px"><input type="checkbox" id="tmImp"> 📌 Anheften (bleibt oben)</label>
   <div class="row"><button class="btn ghost" id="tmNo">Abbrechen</button><button class="btn green" id="tmYes">Speichern</button></div>
 </div></div>
 <div class="toast" id="toast">Kopiert ✓</div>
@@ -622,52 +658,42 @@ $('saveTodo').onclick=async()=>{
 /* ---------- Notizen anzeigen ---------- */
 const photoCache={};
 async function photo(k){if(!(k in photoCache))photoCache[k]=await DB.get(k);return photoCache[k]}
+// Gleiche Knopfleiste für Notizen und Aufgaben
+function bar(kind,pinned){
+  const other=kind==='note'?['totodo','✅','Als Aufgabe']:['tonote','📝','Als Notiz'];
+  const b=[['pin','📌',pinned?'Lösen':'Anheften'],['edit','✏️','Bearbeiten'],['copy','📋','Kopieren'],['say','🔊','Vorlesen'],other,['del','🗑️','Löschen']];
+  return `<div class="bar">${b.map(([a,i,l])=>`<button data-a="${a}" class="${a==='pin'&&pinned?'on':''}"><span>${i}</span>${l}</button>`).join('')}</div>`;
+}
+const isLong=t=>t.length>260||(t.match(/\n/g)||[]).length>5;
 async function renderNotes(){
   const q=$('nSearch').value.trim().toLowerCase();
   const list=notes.filter(n=>!q||n.text.toLowerCase().includes(q)).sort((a,b)=>(b.pin-a.pin)||(b.ts-a.ts));
   $('nCount').textContent=notes.length+(notes.length===1?' Notiz':' Notizen');
   if(!list.length){$('nList').innerHTML=`<div class="empty-st">${notes.length?'Nichts gefunden.':'Noch keine Notizen.<br>Im Reiter <b>🎙 Erfassen</b> diktieren oder Handschrift scannen und auf <b>„💾 Als Notiz speichern“</b> tippen.'}</div>`;return}
-  $('nList').innerHTML=list.map(n=>`<div class="note ${n.pin?'pin':''}" data-id="${n.id}">
-    <div class="meta"><span>${n.pin?'📌 ':''}${fdt(n.ts)}${n.edited?' · bearbeitet':''}</span><span>${n.photos&&n.photos.length?'📷 '+n.photos.length:''}</span></div>
-    <div class="body" data-a="open">${esc(n.text)||'<i style="color:var(--muted)">(nur Foto)</i>'}</div>
+  $('nList').innerHTML=list.map(n=>{const long=isLong(n.text);return `<div class="card note-c ${n.pin?'pin':''}" data-id="${n.id}">
+    <div class="chips">${n.pin?'<span class="chip gold">📌 Angeheftet</span>':''}<span class="chip">🕒 ${fdt(n.ts)}</span>${n.edited?'<span class="chip">✏️ bearbeitet</span>':''}${n.photos&&n.photos.length?`<span class="chip">📷 ${n.photos.length}</span>`:''}</div>
+    <div class="ctext ${long?'long':''}" data-a="open">${esc(n.text)||'<i style="color:var(--muted)">(nur Foto)</i>'}</div>
+    ${long?'<button class="more" data-a="open">▾ Ganzen Text zeigen</button>':''}
     ${n.photos&&n.photos.length?`<div class="thumbs">${n.photos.map(k=>`<div class="th" data-ph="${k}"><img alt="Foto"></div>`).join('')}</div>`:''}
-    <div class="acts"><button data-a="pin">${n.pin?'📌 Lösen':'📌 Anheften'}</button><button data-a="edit">✏ Bearbeiten</button><button data-a="copy">📋</button><button data-a="say">🔊</button><button data-a="todo">✅ Aufgabe</button><button data-a="del" class="del">🗑</button></div>
-  </div>`).join('');
+    ${bar('note',n.pin)}
+  </div>`}).join('');
   for(const el of $('nList').querySelectorAll('[data-ph]')){const src=await photo(el.dataset.ph);if(src)el.querySelector('img').src=src}
 }
 $('nSearch').oninput=renderNotes;
-let editId=null;
-$('nList').onclick=async e=>{
-  const ph=e.target.closest('[data-ph]'); if(ph){const s=await photo(ph.dataset.ph);if(s)bigImg(s);return}
-  const btn=e.target.closest('[data-a]'); if(!btn)return;
-  const card=btn.closest('.note'), n=notes.find(x=>x.id===card.dataset.id); if(!n)return;
-  const a=btn.dataset.a;
-  if(a==='open'){card.classList.toggle('open');return}
-  if(a==='pin'){n.pin=!n.pin;await saveNotes();renderNotes()}
-  if(a==='edit'){editId=n.id;$('editTa').value=n.text;$('editM').classList.add('show')}
-  if(a==='copy')copy(n.text);
-  if(a==='say')speak('note'+n.id,n.text);
-  if(a==='todo'){todos.unshift({id:uid(),text:n.text.split('\n')[0].slice(0,200),due:'',imp:false,done:false,ts:Date.now()});await saveTodos();badges();toast('Als Aufgabe angelegt ✅')}
-  if(a==='del'){
-    if(!btn.classList.contains('sure')){btn.classList.add('sure');btn.textContent='Wirklich löschen?';setTimeout(()=>{btn.classList.remove('sure');btn.textContent='🗑'},3500);return}
-    for(const k of n.photos||[]){await DB.del(k);delete photoCache[k]}
-    notes=notes.filter(x=>x.id!==n.id);await saveNotes();badges();renderNotes();toast('Notiz gelöscht')}
-};
-$('eNo').onclick=()=>$('editM').classList.remove('show');
-$('eYes').onclick=async()=>{const n=notes.find(x=>x.id===editId);if(n){n.text=$('editTa').value.trim();n.edited=Date.now();await saveNotes();renderNotes()}$('editM').classList.remove('show');toast('Gespeichert ✓')};
 
-/* ---------- Aufgaben ---------- */
 function renderTodos(){
   const show=$('tShowDone').checked, t0d=today();
   const open=todos.filter(x=>!x.done).length;
   $('tCount').textContent=open+' offen';
   const list=todos.filter(x=>show||!x.done).sort((a,b)=>(a.done-b.done)||(b.imp-a.imp)||((a.due||'9999')<(b.due||'9999')?-1:(a.due||'9999')>(b.due||'9999')?1:0)||(b.ts-a.ts));
   if(!list.length){$('tList').innerHTML=`<div class="empty-st">${todos.length?'Alles erledigt 🎉':'Noch keine Aufgaben.<br>Oben eintippen – oder im Reiter <b>🎙 Erfassen</b> diktieren und <b>„✅ Als Aufgabe“</b> tippen.'}</div>`;return}
-  $('tList').innerHTML=list.map(x=>{const late=x.due&&!x.done&&x.due<t0d, tod=x.due===t0d;
-    return `<div class="todo ${x.done?'done':''} ${x.imp&&!x.done?'imp':''}" data-id="${x.id}">
-    <button class="ck" data-a="ck">${x.done?'✓':''}</button>
-    <div class="tx" data-a="edit" style="cursor:pointer"><div class="tt">${x.imp?'⭐ ':''}${esc(x.text)}</div>${x.due?`<div class="due ${late?'late':tod?'today':''}">📅 ${tod?'Heute':fd(x.due)}${late?' · überfällig':''}</div>`:''}</div>
-    <div class="side"><button class="mini" data-a="imp" title="Wichtig">${x.imp?'★':'☆'}</button><button class="mini" data-a="edit" title="Bearbeiten">✏</button><button class="mini" data-a="say" title="Vorlesen">🔊</button><button class="mini" data-a="del" title="Löschen">🗑</button></div></div>`}).join('');
+  $('tList').innerHTML=list.map(x=>{const late=x.due&&!x.done&&x.due<t0d, tod=x.due===t0d, long=isLong(x.text);
+    return `<div class="card todo-c ${x.done?'done':''} ${x.imp&&!x.done?'pin':''}" data-id="${x.id}">
+    <div class="chips">${x.imp&&!x.done?'<span class="chip gold">📌 Angeheftet</span>':''}${x.done?'<span class="chip green">✓ Erledigt</span>':''}${x.due?`<span class="chip ${late?'red':tod?'gold':''}">📅 ${tod?'Heute':fd(x.due)}${late?' · überfällig':''}</span>`:''}<span class="chip">🕒 ${fdt(x.ts)}</span>${x.edited?'<span class="chip">✏️ bearbeitet</span>':''}</div>
+    <div class="chead"><button class="ck" data-a="ck" title="Erledigt">${x.done?'✓':''}</button><div class="ctext ${long?'long':''}" data-a="open">${esc(x.text)}</div></div>
+    ${long?'<button class="more" data-a="open">▾ Ganzen Text zeigen</button>':''}
+    ${bar('todo',x.imp)}
+  </div>`}).join('');
 }
 async function addTodo(){const t=$('tNew').value.trim();if(!t){$('tNew').focus();return}
   todos.unshift({id:uid(),text:t,due:$('tDue').value||'',imp:false,done:false,ts:Date.now()});$('tNew').value='';$('tDue').value='';await saveTodos();badges();renderTodos()}
@@ -676,14 +702,42 @@ $('tShowDone').onchange=renderTodos;
 $('tClear').onclick=async()=>{const n=todos.filter(x=>x.done).length;if(!n){toast('Keine erledigten Aufgaben');return}
   const b=$('tClear');if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent=n+' löschen? Nochmal tippen';setTimeout(()=>{b.classList.remove('sure');b.textContent='🧹 Erledigte löschen'},3500);return}
   b.classList.remove('sure');b.textContent='🧹 Erledigte löschen';todos=todos.filter(x=>!x.done);await saveTodos();badges();renderTodos();toast(n+' gelöscht')};
-$('tList').onclick=async e=>{
-  const btn=e.target.closest('[data-a]');if(!btn)return;const x=todos.find(t=>t.id===btn.closest('.todo').dataset.id);if(!x)return;
+
+// Löschen mit Nachfrage (beide gleich)
+function sure(btn){if(btn.classList.contains('sure'))return true;btn.classList.add('sure');const h=btn.innerHTML;btn.innerHTML='<span>⚠️</span>Sicher?';setTimeout(()=>{if(btn.isConnected){btn.classList.remove('sure');btn.innerHTML=h}},3500);return false}
+
+// Notizen: Klicks
+let editId=null;
+$('nList').onclick=async e=>{
+  const ph=e.target.closest('[data-ph]'); if(ph){const s=await photo(ph.dataset.ph);if(s)bigImg(s);return}
+  const btn=e.target.closest('[data-a]'); if(!btn)return;
+  const card=btn.closest('.card'), n=notes.find(x=>x.id===card.dataset.id); if(!n)return;
   const a=btn.dataset.a;
+  if(a==='open'){card.classList.toggle('open');const m=card.querySelector('.more');if(m)m.textContent=card.classList.contains('open')?'▴ Weniger zeigen':'▾ Ganzen Text zeigen';return}
+  if(a==='pin'){n.pin=!n.pin;await saveNotes();renderNotes();toast(n.pin?'Angeheftet 📌':'Gelöst')}
+  if(a==='edit'){editId=n.id;$('editTa').value=n.text;$('ePin').checked=!!n.pin;$('editM').classList.add('show')}
+  if(a==='copy')copy(n.text);
+  if(a==='say')speak('note'+n.id,n.text);
+  if(a==='totodo'){todos.unshift({id:uid(),text:n.text,due:'',imp:!!n.pin,done:false,ts:Date.now()});await saveTodos();badges();toast('Als Aufgabe angelegt ✅')}
+  if(a==='del'){if(!sure(btn))return;
+    for(const k of n.photos||[]){await DB.del(k);delete photoCache[k]}
+    notes=notes.filter(x=>x.id!==n.id);await saveNotes();badges();renderNotes();toast('Notiz gelöscht')}
+};
+$('eNo').onclick=()=>$('editM').classList.remove('show');
+$('eYes').onclick=async()=>{const n=notes.find(x=>x.id===editId);if(n){n.text=$('editTa').value.trim();n.pin=$('ePin').checked;n.edited=Date.now();await saveNotes();renderNotes()}$('editM').classList.remove('show');toast('Gespeichert ✓')};
+
+// Aufgaben: Klicks
+$('tList').onclick=async e=>{
+  const btn=e.target.closest('[data-a]');if(!btn)return;const card=btn.closest('.card');const x=todos.find(t=>t.id===card.dataset.id);if(!x)return;
+  const a=btn.dataset.a;
+  if(a==='open'){ if(card.querySelector('.ctext.long')){card.classList.toggle('open');const m=card.querySelector('.more');if(m)m.textContent=card.classList.contains('open')?'▴ Weniger zeigen':'▾ Ganzen Text zeigen'} else openTodo(x); return}
   if(a==='ck'){x.done=!x.done;x.doneTs=x.done?Date.now():null;if(x.done)toast('Erledigt ✓')}
-  if(a==='imp')x.imp=!x.imp;
-  if(a==='say'){speak('todo'+x.id,x.text);return}
+  if(a==='pin'){x.imp=!x.imp;toast(x.imp?'Angeheftet 📌':'Gelöst')}
   if(a==='edit'){openTodo(x);return}
-  if(a==='del'){if(!btn.classList.contains('sure')){btn.classList.add('sure');btn.textContent='?';setTimeout(()=>{btn.classList.remove('sure');btn.textContent='🗑'},3000);return}todos=todos.filter(t=>t.id!==x.id)}
+  if(a==='copy'){copy(x.text);return}
+  if(a==='say'){speak('todo'+x.id,x.text);return}
+  if(a==='tonote'){notes.unshift({id:uid(),text:x.text+(x.due?'\n📅 Fällig: '+fd(x.due):''),ts:Date.now(),pin:!!x.imp,photos:[]});await saveNotes();badges();toast('Als Notiz gespeichert 📝');return}
+  if(a==='del'){if(!sure(btn))return;todos=todos.filter(t=>t.id!==x.id);toast('Aufgabe gelöscht')}
   await saveTodos();badges();renderTodos();
 };
 
