@@ -27,7 +27,7 @@
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 .wrap{max-width:980px;margin:0 auto;padding:18px 14px 40px}
 header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
-.brand{display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}.brand>div:last-child{min-width:0}
 .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#ff8a5c);display:grid;place-items:center;box-shadow:var(--shadow)}
 .logo svg{width:20px;height:20px}
 h1{font-family:"JetBrains Mono",monospace;font-size:18px;margin:0;letter-spacing:.5px}
@@ -126,6 +126,15 @@ input.inp:focus{border-color:var(--blue)}
 .bar button.on{border-color:var(--gold);color:var(--gold)}
 .bar button.sure{background:var(--accent);border-color:var(--accent);color:#fff}
 @media(min-width:420px) and (max-width:679px){.bar{grid-template-columns:repeat(6,1fr)}}
+.hbtns{display:flex;gap:8px;align-items:stretch;flex:none}
+.hbtns .iconbtn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;text-align:center}
+@media(max-width:560px){.hbtns{gap:6px}.hbtns .iconbtn{flex-direction:column;gap:2px;padding:6px 8px;font-size:11.5px;min-width:62px}.hbtns .iconbtn span{font-size:18px}.sub{font-size:10.5px}h1{font-size:16px}}
+/* Optionen aufklappbar */
+.card .bar{display:none}
+.card.showbar .bar{display:grid}
+.optbtn{margin-top:12px;align-self:stretch;display:flex;align-items:center;justify-content:center;gap:8px;border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:12px;padding:9px;font:600 13px Inter;cursor:pointer}
+.card.showbar .optbtn{border-style:solid;color:var(--cc);border-color:color-mix(in srgb,var(--cc) 45%,var(--line))}
+.card.showbar .bar{padding-top:8px}.card.showbar .bar::before{display:none}
 /* Eingabe neue Aufgabe */
 .addrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .addrow #tNew{grid-column:1/-1}
@@ -166,7 +175,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
       <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
       <div><h1>DIKTIERGERÄT</h1><div class="sub">Bayazit · Diktieren · Scannen · Notizen · Aufgaben</div></div>
     </div>
-    <button class="iconbtn" id="themeBtn" title="Hell/Dunkel umschalten">☀️ Hell</button>
+    <div class="hbtns"><button class="iconbtn" id="bkBtn" title="Sicherung von Notizen und Aufgaben"><span>💾</span>Sicherung</button><button class="iconbtn" id="themeBtn" title="Hell/Dunkel umschalten"><span>☀️</span>Hell</button></div>
   </header>
 
   <div class="view on" id="v-cap">
@@ -260,15 +269,6 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
       <input class="inp" id="nSearch" placeholder="🔍 Notizen durchsuchen …" style="width:100%">
       <div class="cards" id="nList"></div>
     </section>
-    <section class="tile" style="--c:var(--accent2);margin-top:14px">
-      <div class="tag">💾 Sicherung</div>
-      <div class="hint" style="margin:0 0 10px">Notizen, Aufgaben und Fotos sind nur auf <b>diesem Gerät</b> gespeichert. Lade ab und zu eine Sicherung herunter – damit kannst du alles auch auf ein anderes Gerät holen.</div>
-      <div class="row">
-        <button class="btn green" id="bkDown">⬇ Sicherung herunterladen</button>
-        <label class="btn ghost">⬆ Sicherung laden<input type="file" id="bkIn" accept=".json,application/json" hidden></label>
-      </div>
-      <div class="changes" id="bkInfo"></div>
-    </section>
   </div>
 
   <!-- Aufgaben -->
@@ -314,6 +314,16 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
   <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px"><input type="checkbox" id="tmImp"> 📌 Anheften (bleibt oben)</label>
   <div class="row"><button class="btn ghost" id="tmNo">Abbrechen</button><button class="btn green" id="tmYes">Speichern</button></div>
 </div></div>
+<div class="modal" id="bkM"><div class="box" style="max-width:460px">
+  <h3>💾 Sicherung</h3>
+      <div class="hint" style="margin:0 0 10px">Notizen, Aufgaben und Fotos sind nur auf <b>diesem Gerät</b> gespeichert. Lade ab und zu eine Sicherung herunter – damit kannst du alles auch auf ein anderes Gerät holen.</div>
+      <div class="row">
+        <button class="btn green" id="bkDown">⬇ Sicherung herunterladen</button>
+        <label class="btn ghost">⬆ Sicherung laden<input type="file" id="bkIn" accept=".json,application/json" hidden></label>
+      </div>
+      <div class="changes" id="bkInfo"></div>
+      <div class="row"><button class="btn ghost" id="bkClose" style="flex:1;justify-content:center">Schließen</button></div>
+</div></div>
 <div class="toast" id="toast">Kopiert ✓</div>
 <div class="modal" id="modal"><div class="box">
   <h3>Text löschen?</h3><p>Der gesamte Text und die Korrektur werden entfernt.</p>
@@ -329,7 +339,7 @@ let mode='fehler', fixed='', dict=null, sample=null, listening=false, t0=0, tick
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 ta.value=store.get('diktat_text')||'';
 /* ---------- Hell/Dunkel ---------- */
-function setTheme(t){document.documentElement.dataset.theme=t;$('themeBtn').textContent=t==='light'?'🌙 Dunkel':'☀️ Hell';store.set('diktat_theme',t)}
+function setTheme(t){document.documentElement.dataset.theme=t;$('themeBtn').innerHTML=t==='light'?'<span>🌙</span>Dunkel':'<span>☀️</span>Hell';store.set('diktat_theme',t)}
 setTheme(store.get('diktat_theme')||'dark');
 $('themeBtn').onclick=()=>setTheme(document.documentElement.dataset.theme==='light'?'dark':'light');
 
@@ -662,8 +672,10 @@ async function photo(k){if(!(k in photoCache))photoCache[k]=await DB.get(k);retu
 function bar(kind,pinned){
   const other=kind==='note'?['totodo','✅','Als Aufgabe']:['tonote','📝','Als Notiz'];
   const b=[['pin','📌',pinned?'Lösen':'Anheften'],['edit','✏️','Bearbeiten'],['copy','📋','Kopieren'],['say','🔊','Vorlesen'],other,['del','🗑️','Löschen']];
-  return `<div class="bar">${b.map(([a,i,l])=>`<button data-a="${a}" class="${a==='pin'&&pinned?'on':''}"><span>${i}</span>${l}</button>`).join('')}</div>`;
+  return `<button class="optbtn" data-a="opts">⚙️ Optionen ▾</button><div class="bar">${b.map(([a,i,l])=>`<button data-a="${a}" class="${a==='pin'&&pinned?'on':''}"><span>${i}</span>${l}</button>`).join('')}</div>`;
 }
+const openBars=new Set();
+function keepBars(el){el.querySelectorAll('.card').forEach(c=>{if(openBars.has(c.dataset.id)){c.classList.add('showbar');const o=c.querySelector('.optbtn');if(o)o.textContent='⚙️ Optionen ▴'}})}
 const isLong=t=>t.length>260||(t.match(/\n/g)||[]).length>5;
 async function renderNotes(){
   const q=$('nSearch').value.trim().toLowerCase();
@@ -677,6 +689,7 @@ async function renderNotes(){
     ${n.photos&&n.photos.length?`<div class="thumbs">${n.photos.map(k=>`<div class="th" data-ph="${k}"><img alt="Foto"></div>`).join('')}</div>`:''}
     ${bar('note',n.pin)}
   </div>`}).join('');
+  keepBars($('nList'));
   for(const el of $('nList').querySelectorAll('[data-ph]')){const src=await photo(el.dataset.ph);if(src)el.querySelector('img').src=src}
 }
 $('nSearch').oninput=renderNotes;
@@ -694,6 +707,7 @@ function renderTodos(){
     ${long?'<button class="more" data-a="open">▾ Ganzen Text zeigen</button>':''}
     ${bar('todo',x.imp)}
   </div>`}).join('');
+  keepBars($('tList'));
 }
 async function addTodo(){const t=$('tNew').value.trim();if(!t){$('tNew').focus();return}
   todos.unshift({id:uid(),text:t,due:$('tDue').value||'',imp:false,done:false,ts:Date.now()});$('tNew').value='';$('tDue').value='';await saveTodos();badges();renderTodos()}
@@ -711,6 +725,7 @@ let editId=null;
 $('nList').onclick=async e=>{
   const ph=e.target.closest('[data-ph]'); if(ph){const s=await photo(ph.dataset.ph);if(s)bigImg(s);return}
   const btn=e.target.closest('[data-a]'); if(!btn)return;
+  if(btn.dataset.a==='opts'){const c=btn.closest('.card');c.classList.toggle('showbar');c.classList.contains('showbar')?openBars.add(c.dataset.id):openBars.delete(c.dataset.id);btn.textContent=c.classList.contains('showbar')?'⚙️ Optionen ▴':'⚙️ Optionen ▾';return}
   const card=btn.closest('.card'), n=notes.find(x=>x.id===card.dataset.id); if(!n)return;
   const a=btn.dataset.a;
   if(a==='open'){card.classList.toggle('open');const m=card.querySelector('.more');if(m)m.textContent=card.classList.contains('open')?'▴ Weniger zeigen':'▾ Ganzen Text zeigen';return}
@@ -728,7 +743,8 @@ $('eYes').onclick=async()=>{const n=notes.find(x=>x.id===editId);if(n){n.text=$(
 
 // Aufgaben: Klicks
 $('tList').onclick=async e=>{
-  const btn=e.target.closest('[data-a]');if(!btn)return;const card=btn.closest('.card');const x=todos.find(t=>t.id===card.dataset.id);if(!x)return;
+  const btn=e.target.closest('[data-a]');if(!btn)return;
+  if(btn.dataset.a==='opts'){const c=btn.closest('.card');c.classList.toggle('showbar');c.classList.contains('showbar')?openBars.add(c.dataset.id):openBars.delete(c.dataset.id);btn.textContent=c.classList.contains('showbar')?'⚙️ Optionen ▴':'⚙️ Optionen ▾';return}const card=btn.closest('.card');const x=todos.find(t=>t.id===card.dataset.id);if(!x)return;
   const a=btn.dataset.a;
   if(a==='open'){ if(card.querySelector('.ctext.long')){card.classList.toggle('open');const m=card.querySelector('.more');if(m)m.textContent=card.classList.contains('open')?'▴ Weniger zeigen':'▾ Ganzen Text zeigen'} else openTodo(x); return}
   if(a==='ck'){x.done=!x.done;x.doneTs=x.done?Date.now():null;if(x.done)toast('Erledigt ✓')}
@@ -751,6 +767,8 @@ $('tmYes').onclick=async()=>{const x=todos.find(t=>t.id===tEditId);const t=$('tm
   $('todoM').classList.remove('show');toast('Gespeichert ✓')};
 
 /* ---------- Sicherung ---------- */
+$('bkBtn').onclick=()=>{$('bkInfo').textContent='';$('bkM').classList.add('show')};
+$('bkClose').onclick=()=>$('bkM').classList.remove('show');
 $('bkDown').onclick=async()=>{
   const photos={};for(const n of notes)for(const k of n.photos||[]){photos[k]=await photo(k)}
   const data=JSON.stringify({app:'diktat',version:1,datum:new Date().toISOString(),notes,todos,photos});
