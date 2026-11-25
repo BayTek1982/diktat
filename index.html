@@ -118,14 +118,15 @@ input.inp:focus{border-color:var(--blue)}
 .ctext.long{max-height:9em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
 .card.open .ctext.long{max-height:none;-webkit-mask-image:none;mask-image:none}
 .more{font:600 12px Inter;color:var(--cc);background:none;border:none;padding:4px 0 0;cursor:pointer;align-self:flex-start}
-.bar{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:auto;padding-top:12px}
+.bar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:auto;padding-top:12px}
 .bar::before{content:"";grid-column:1/-1;height:1px;background:var(--line);margin:0 0 6px}
 .bar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:54px;padding:6px 4px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:12px;font:600 11.5px Inter;cursor:pointer;transition:background .15s,border-color .15s}
 .bar button span{font-size:18px;line-height:1}
 .bar button:active{transform:scale(.97)}
 .bar button.on{border-color:var(--gold);color:var(--gold)}
 .bar button.sure{background:var(--accent);border-color:var(--accent);color:#fff}
-@media(min-width:420px) and (max-width:679px){.bar{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:370px){.bar button{font-size:10.5px}}
+.sharebtn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:600 15px Inter;text-decoration:none;cursor:pointer}
 .hbtns{display:flex;gap:8px;align-items:stretch;flex:none}
 .hbtns .iconbtn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;text-align:center}
 @media(max-width:560px){.hbtns{gap:6px}.hbtns .iconbtn{flex-direction:column;gap:2px;padding:6px 8px;font-size:11.5px;min-width:62px}.hbtns .iconbtn span{font-size:18px}.sub{font-size:10.5px}h1{font-size:16px}}
@@ -266,7 +267,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
   <div class="view" id="v-notes">
     <section class="tile" style="--c:var(--blue)">
       <div class="tag">📝 Notizen <span class="count" id="nCount">0</span></div>
-      <input class="inp" id="nSearch" placeholder="🔍 Notizen durchsuchen …" style="width:100%">
+      <div style="display:flex;gap:8px"><input class="inp" id="nSearch" placeholder="🔍 Notizen durchsuchen …" style="flex:1"><button class="btn ghost" id="nShareAll" style="padding:7px 12px;font-size:12.5px">📤 Alle teilen</button></div>
       <div class="cards" id="nList"></div>
     </section>
   </div>
@@ -282,7 +283,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
       </div>
       <div class="row" style="justify-content:space-between">
         <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px"><input type="checkbox" id="tShowDone"> Erledigte anzeigen</label>
-        <button class="btn ghost" id="tClear" style="padding:7px 10px;font-size:12.5px">🧹 Erledigte löschen</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn ghost" id="tShareAll" style="padding:7px 10px;font-size:12.5px">📤 Liste teilen</button><button class="btn ghost" id="tClear" style="padding:7px 10px;font-size:12.5px">🧹 Erledigte löschen</button></div>
       </div>
       <div class="cards" id="tList"></div>
     </section>
@@ -323,6 +324,17 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
       </div>
       <div class="changes" id="bkInfo"></div>
       <div class="row"><button class="btn ghost" id="bkClose" style="flex:1;justify-content:center">Schließen</button></div>
+</div></div>
+<div class="modal" id="shareM"><div class="box" style="max-width:420px">
+  <h3>📤 Teilen über …</h3>
+  <div style="display:grid;gap:8px">
+    <a class="sharebtn" id="shWa" target="_blank" rel="noopener">💬 WhatsApp</a>
+    <a class="sharebtn" id="shTg" target="_blank" rel="noopener">✈️ Telegram</a>
+    <a class="sharebtn" id="shMail">✉️ E-Mail</a>
+    <a class="sharebtn" id="shSms">📱 SMS</a>
+    <button class="sharebtn" id="shCopy">📋 Text kopieren</button>
+  </div>
+  <div class="row"><button class="btn ghost" id="shClose" style="flex:1;justify-content:center">Schließen</button></div>
 </div></div>
 <div class="toast" id="toast">Kopiert ✓</div>
 <div class="modal" id="modal"><div class="box">
@@ -671,7 +683,7 @@ async function photo(k){if(!(k in photoCache))photoCache[k]=await DB.get(k);retu
 // Gleiche Knopfleiste für Notizen und Aufgaben
 function bar(kind,pinned){
   const other=kind==='note'?['totodo','✅','Als Aufgabe']:['tonote','📝','Als Notiz'];
-  const b=[['pin','📌',pinned?'Lösen':'Anheften'],['edit','✏️','Bearbeiten'],['copy','📋','Kopieren'],['say','🔊','Vorlesen'],other,['del','🗑️','Löschen']];
+  const b=[['pin','📌',pinned?'Lösen':'Anheften'],['edit','✏️','Bearbeiten'],['copy','📋','Kopieren'],['share','📤','Teilen'],['say','🔊','Vorlesen'],other,['del','🗑️','Löschen']];
   return `<button class="optbtn" data-a="opts">⚙️ Optionen ▾</button><div class="bar">${b.map(([a,i,l])=>`<button data-a="${a}" class="${a==='pin'&&pinned?'on':''}"><span>${i}</span>${l}</button>`).join('')}</div>`;
 }
 const openBars=new Set();
@@ -732,6 +744,7 @@ $('nList').onclick=async e=>{
   if(a==='pin'){n.pin=!n.pin;await saveNotes();renderNotes();toast(n.pin?'Angeheftet 📌':'Gelöst')}
   if(a==='edit'){editId=n.id;$('editTa').value=n.text;$('ePin').checked=!!n.pin;$('editM').classList.add('show')}
   if(a==='copy')copy(n.text);
+  if(a==='share'){shareIt('Notiz',noteShareText(n),n.photos);return}
   if(a==='say')speak('note'+n.id,n.text);
   if(a==='totodo'){todos.unshift({id:uid(),text:n.text,due:'',imp:!!n.pin,done:false,ts:Date.now()});await saveTodos();badges();toast('Als Aufgabe angelegt ✅')}
   if(a==='del'){if(!sure(btn))return;
@@ -751,6 +764,7 @@ $('tList').onclick=async e=>{
   if(a==='pin'){x.imp=!x.imp;toast(x.imp?'Angeheftet 📌':'Gelöst')}
   if(a==='edit'){openTodo(x);return}
   if(a==='copy'){copy(x.text);return}
+  if(a==='share'){shareIt('Aufgabe',todoShareText(x));return}
   if(a==='say'){speak('todo'+x.id,x.text);return}
   if(a==='tonote'){notes.unshift({id:uid(),text:x.text+(x.due?'\n📅 Fällig: '+fd(x.due):''),ts:Date.now(),pin:!!x.imp,photos:[]});await saveNotes();badges();toast('Als Notiz gespeichert 📝');return}
   if(a==='del'){if(!sure(btn))return;todos=todos.filter(t=>t.id!==x.id);toast('Aufgabe gelöscht')}
@@ -765,6 +779,46 @@ $('tmYes').onclick=async()=>{const x=todos.find(t=>t.id===tEditId);const t=$('tm
   if(!t){toast('Text darf nicht leer sein');return}
   if(x){x.text=t;x.due=$('tmDue').value||'';x.imp=$('tmImp').checked;x.edited=Date.now();await saveTodos();badges();renderTodos()}
   $('todoM').classList.remove('show');toast('Gespeichert ✓')};
+
+/* ---------- Teilen ---------- */
+const noteShareText=n=>'📝 Notiz vom '+fdt(n.ts)+'\n\n'+n.text;
+const todoShareText=x=>(x.done?'✅ Erledigt: ':'☐ Aufgabe: ')+x.text+(x.due?'\n📅 Fällig: '+fd(x.due):'')+(x.imp?'\n📌 Wichtig':'');
+async function shareIt(title,text,photoKeys){
+  // 1) Handy-eigenes Teilen (WhatsApp, Mail, Telegram …), mit Fotos wenn möglich
+  if(navigator.share){
+    try{
+      let files=[];
+      if(photoKeys&&photoKeys.length&&navigator.canShare){
+        for(const [i,k] of photoKeys.entries()){const d=await photo(k);if(d){const b=await (await fetch(d)).blob();files.push(new File([b],'notiz-foto-'+(i+1)+'.jpg',{type:'image/jpeg'}))}}
+        if(!navigator.canShare({files}))files=[];
+      }
+      await navigator.share(files.length?{title,text,files}:{title,text});
+      return;
+    }catch(e){ if(e&&e.name==='AbortError')return; }
+  }
+  // 2) Ersatz: eigene Auswahl
+  const t=encodeURIComponent(text);
+  $('shWa').href='https://wa.me/?text='+t;
+  $('shTg').href='https://t.me/share/url?url='+encodeURIComponent(' ')+'&text='+t;
+  $('shMail').href='mailto:?subject='+encodeURIComponent(title)+'&body='+t;
+  $('shSms').href='sms:?body='+t;
+  $('shCopy').onclick=()=>{copy(text);$('shareM').classList.remove('show')};
+  $('shareM').classList.add('show');
+}
+$('shClose').onclick=()=>$('shareM').classList.remove('show');
+$('shareM').addEventListener('click',e=>{if(e.target.closest('a.sharebtn'))setTimeout(()=>$('shareM').classList.remove('show'),300)});
+$('nShareAll').onclick=()=>{
+  const q=$('nSearch').value.trim().toLowerCase();
+  const list=notes.filter(n=>!q||n.text.toLowerCase().includes(q)).sort((a,b)=>(b.pin-a.pin)||(b.ts-a.ts));
+  if(!list.length){toast('Keine Notizen zum Teilen');return}
+  shareIt('Meine Notizen',list.map(noteShareText).join('\n\n— — —\n\n'));
+};
+$('tShareAll').onclick=()=>{
+  const show=$('tShowDone').checked;
+  const list=todos.filter(x=>show||!x.done).sort((a,b)=>(a.done-b.done)||(b.imp-a.imp)||(b.ts-a.ts));
+  if(!list.length){toast('Keine Aufgaben zum Teilen');return}
+  shareIt('Meine Aufgaben','📋 Meine Aufgaben ('+new Date().toLocaleDateString('de-DE')+')\n\n'+list.map(x=>(x.done?'✅ ':'☐ ')+(x.imp?'📌 ':'')+x.text+(x.due?' (📅 '+fd(x.due)+')':'')).join('\n'));
+};
 
 /* ---------- Sicherung ---------- */
 $('bkBtn').onclick=()=>{$('bkInfo').textContent='';$('bkM').classList.add('show')};

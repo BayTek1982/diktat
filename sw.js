@@ -1,5 +1,5 @@
 // Kleiner Hintergrunddienst: speichert die App-Seite, damit sie als echte App startet und auch offline öffnet
-const CACHE = "diktat-v6";
+const CACHE = "diktat-v7";
 const FILES = ["/", "/index.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => {
