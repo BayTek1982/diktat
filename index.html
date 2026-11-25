@@ -242,7 +242,7 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
       <div class="tag">✅ Aufgaben <span class="count" id="tCount">0 offen</span></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input class="inp" id="tNew" placeholder="Neue Aufgabe …" style="flex:1;min-width:180px">
-        <input class="inp" id="tDue" type="date" title="Fällig am (optional)" style="width:150px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)">📅<input class="inp" id="tDue" type="date" title="Fällig am (optional)" style="width:150px"></label>
         <button class="btn green" id="tAdd">＋ Hinzufügen</button>
       </div>
       <div class="row" style="justify-content:space-between">
@@ -266,6 +266,17 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
   <h3>Notiz bearbeiten</h3>
   <textarea id="editTa" style="min-height:240px"></textarea>
   <div class="row"><button class="btn ghost" id="eNo">Abbrechen</button><button class="btn" id="eYes">Speichern</button></div>
+</div></div>
+<div class="modal" id="todoM"><div class="box" style="max-width:480px">
+  <h3>Aufgabe bearbeiten</h3>
+  <textarea id="tmText" style="min-height:110px"></textarea>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">
+    <label style="font-size:13px;color:var(--muted)">📅 Fällig am</label>
+    <input class="inp" id="tmDue" type="date" style="flex:1;min-width:150px">
+    <button class="btn ghost" id="tmNoDue" style="padding:9px 10px">Kein Datum</button>
+  </div>
+  <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px"><input type="checkbox" id="tmImp"> ⭐ Wichtig</label>
+  <div class="row"><button class="btn ghost" id="tmNo">Abbrechen</button><button class="btn green" id="tmYes">Speichern</button></div>
 </div></div>
 <div class="toast" id="toast">Kopiert ✓</div>
 <div class="modal" id="modal"><div class="box">
@@ -655,8 +666,8 @@ function renderTodos(){
   $('tList').innerHTML=list.map(x=>{const late=x.due&&!x.done&&x.due<t0d, tod=x.due===t0d;
     return `<div class="todo ${x.done?'done':''} ${x.imp&&!x.done?'imp':''}" data-id="${x.id}">
     <button class="ck" data-a="ck">${x.done?'✓':''}</button>
-    <div class="tx"><div class="tt">${x.imp?'⭐ ':''}${esc(x.text)}</div>${x.due?`<div class="due ${late?'late':tod?'today':''}">📅 ${tod?'Heute':fd(x.due)}${late?' · überfällig':''}</div>`:''}</div>
-    <div class="side"><button class="mini" data-a="imp" title="Wichtig">${x.imp?'★':'☆'}</button><button class="mini" data-a="say" title="Vorlesen">🔊</button><button class="mini" data-a="del" title="Löschen">🗑</button></div></div>`}).join('');
+    <div class="tx" data-a="edit" style="cursor:pointer"><div class="tt">${x.imp?'⭐ ':''}${esc(x.text)}</div>${x.due?`<div class="due ${late?'late':tod?'today':''}">📅 ${tod?'Heute':fd(x.due)}${late?' · überfällig':''}</div>`:''}</div>
+    <div class="side"><button class="mini" data-a="imp" title="Wichtig">${x.imp?'★':'☆'}</button><button class="mini" data-a="edit" title="Bearbeiten">✏</button><button class="mini" data-a="say" title="Vorlesen">🔊</button><button class="mini" data-a="del" title="Löschen">🗑</button></div></div>`}).join('');
 }
 async function addTodo(){const t=$('tNew').value.trim();if(!t){$('tNew').focus();return}
   todos.unshift({id:uid(),text:t,due:$('tDue').value||'',imp:false,done:false,ts:Date.now()});$('tNew').value='';$('tDue').value='';await saveTodos();badges();renderTodos()}
@@ -671,9 +682,19 @@ $('tList').onclick=async e=>{
   if(a==='ck'){x.done=!x.done;x.doneTs=x.done?Date.now():null;if(x.done)toast('Erledigt ✓')}
   if(a==='imp')x.imp=!x.imp;
   if(a==='say'){speak('todo'+x.id,x.text);return}
+  if(a==='edit'){openTodo(x);return}
   if(a==='del'){if(!btn.classList.contains('sure')){btn.classList.add('sure');btn.textContent='?';setTimeout(()=>{btn.classList.remove('sure');btn.textContent='🗑'},3000);return}todos=todos.filter(t=>t.id!==x.id)}
   await saveTodos();badges();renderTodos();
 };
+
+let tEditId=null;
+function openTodo(x){tEditId=x.id;$('tmText').value=x.text;$('tmDue').value=x.due||'';$('tmImp').checked=!!x.imp;$('todoM').classList.add('show');setTimeout(()=>$('tmText').focus(),50)}
+$('tmNo').onclick=()=>$('todoM').classList.remove('show');
+$('tmNoDue').onclick=()=>{$('tmDue').value=''};
+$('tmYes').onclick=async()=>{const x=todos.find(t=>t.id===tEditId);const t=$('tmText').value.trim();
+  if(!t){toast('Text darf nicht leer sein');return}
+  if(x){x.text=t;x.due=$('tmDue').value||'';x.imp=$('tmImp').checked;x.edited=Date.now();await saveTodos();badges();renderTodos()}
+  $('todoM').classList.remove('show');toast('Gespeichert ✓')};
 
 /* ---------- Sicherung ---------- */
 $('bkDown').onclick=async()=>{
