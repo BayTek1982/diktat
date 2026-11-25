@@ -73,7 +73,7 @@ textarea:focus{border-color:var(--blue)}
 .out{white-space:pre-wrap;min-height:120px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;font:16px/1.55 Inter,sans-serif}
 .out.empty{color:var(--muted);font-style:italic}
 .changes{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--accent2);color:#06281f;font-weight:700;padding:11px 18px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:9;box-shadow:var(--shadow)}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--accent2);color:#06281f;font-weight:700;padding:11px 18px;border-radius:12px;opacity:0;transition:.25s;pointer-events:none;z-index:9;box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:10;padding:16px}
 .modal.show{display:grid}
@@ -82,6 +82,45 @@ textarea:focus{border-color:var(--blue)}
 .modal p{margin:0 0 14px;color:var(--muted);font-size:14px}
 .spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
 @keyframes sp{to{transform:rotate(360deg)}}
+/* Reiter unten */
+.wrap{padding-bottom:110px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;display:flex;justify-content:center;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+.tabs button{flex:1;max-width:200px;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:14px;padding:9px 6px;font:600 12.5px Inter;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tabs button span{font-size:19px}
+.tabs button.on{color:var(--text);border-color:var(--tc);box-shadow:inset 0 -3px 0 var(--tc)}
+.tabs .badge{font:700 10px "JetBrains Mono",monospace;background:var(--tc);color:#06281f;border-radius:99px;padding:0 6px;margin-left:4px}
+.view{display:none}.view.on{display:block}
+input.inp,select.inp{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:11px;padding:11px 12px;font:15px Inter;outline:none;min-width:0}
+input.inp:focus{border-color:var(--blue)}
+/* Fotos */
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.thumbs .th{position:relative;width:74px;height:74px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--panel2);cursor:pointer}
+.thumbs .th img{width:100%;height:100%;object-fit:cover}
+.thumbs .th b{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.65);color:#fff;border-radius:99px;width:22px;height:22px;display:grid;place-items:center;font-size:12px}
+/* Notizen */
+.list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.note{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.note.pin{border-color:var(--gold)}
+.note .meta{font:500 11.5px "JetBrains Mono",monospace;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
+.note .body{white-space:pre-wrap;font-size:15px;line-height:1.5;max-height:7.6em;overflow:hidden;cursor:pointer}
+.note.open .body{max-height:none}
+.note .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.note .acts button,.todo button.mini{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:9px;padding:6px 9px;font:600 12.5px Inter;cursor:pointer}
+.note .acts button.del.sure,.todo button.mini.sure{background:var(--accent);color:#fff;border-color:var(--accent)}
+.empty-st{color:var(--muted);text-align:center;padding:26px 10px;font-size:14px}
+/* Aufgaben */
+.todo{display:flex;align-items:flex-start;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:11px 12px}
+.todo.imp{border-color:var(--gold)}
+.todo.done{opacity:.55}.todo.done .tt{text-decoration:line-through}
+.todo .ck{width:26px;height:26px;flex:none;border-radius:8px;border:2px solid var(--accent2);background:transparent;cursor:pointer;display:grid;place-items:center;color:#06281f;font-weight:800}
+.todo.done .ck{background:var(--accent2)}
+.todo .tx{flex:1;min-width:0}
+.todo .tt{font-size:15px;line-height:1.4;word-wrap:break-word}
+.todo .due{font:500 11.5px "JetBrains Mono",monospace;color:var(--muted);margin-top:3px}
+.todo .due.late{color:var(--accent)}.todo .due.today{color:var(--gold)}
+.todo .side{display:flex;gap:5px;flex:none}
+.imgview{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;z-index:12;padding:12px}
+.imgview.show{display:grid}.imgview img{max-width:100%;max-height:92vh;border-radius:8px}
 footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);font-family:"JetBrains Mono",monospace}
 </style>
 </head>
@@ -90,11 +129,12 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
   <header>
     <div class="brand">
       <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
-      <div><h1>DIKTIERGERÄT</h1><div class="sub">Bayazit · Sprechen · Korrigieren · Kopieren</div></div>
+      <div><h1>DIKTIERGERÄT</h1><div class="sub">Bayazit · Diktieren · Scannen · Notizen · Aufgaben</div></div>
     </div>
     <button class="iconbtn" id="themeBtn" title="Hell/Dunkel umschalten">☀️ Hell</button>
   </header>
 
+  <div class="view on" id="v-cap">
   <div class="grid">
     <!-- Aufnahme -->
     <section class="tile" style="--c:var(--accent)">
@@ -116,11 +156,27 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
     <!-- Text -->
     <section class="tile" style="--c:var(--blue)">
       <div class="tag">02 · Dein Text <span class="count" id="count">0 Wörter</span></div>
-      <textarea id="text" placeholder="Hier erscheint dein diktierter Text. Du kannst auch tippen oder das Mikrofon deiner Handy-Tastatur benutzen."></textarea>
+      <div class="row" style="margin:0 0 10px">
+        <button class="btn ghost" id="camBtn">📷 Handschrift fotografieren</button>
+        <button class="btn ghost" id="galBtn">🖼 Aus Galerie</button>
+        <input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+        <input type="file" id="galIn" accept="image/*" multiple hidden>
+      </div>
+      <div id="scanBox" style="display:none;margin-bottom:10px">
+        <div class="thumbs" id="pend"></div>
+        <div class="row"><button class="btn gold big" id="scanBtn">🔎 Handschrift lesen</button><button class="btn ghost" id="scanClr">✖ Fotos weg</button></div>
+        <div class="changes" id="scanInfo">Tipp: Mehrere Seiten nacheinander fotografieren – sie werden zu einem Text zusammengefasst.</div>
+      </div>
+      <textarea id="text" placeholder="Hier erscheint dein diktierter oder gescannter Text. Du kannst auch tippen oder das Mikrofon deiner Handy-Tastatur benutzen."></textarea>
       <div class="row">
         <button class="btn big green" id="copyRaw">📋 Text kopieren</button>
         <button class="btn danger" id="clearBtn">🗑 Löschen</button>
       </div>
+      <div class="row">
+        <button class="btn big" id="saveNote">💾 Als Notiz speichern</button>
+        <button class="btn big green" id="saveTodo">✅ Als Aufgabe</button>
+      </div>
+      <div class="changes" id="saveInfo">Gespeichert wird der korrigierte Text, falls vorhanden – sonst dein Text.</div>
     </section>
 
     <!-- Korrektur -->
@@ -160,9 +216,57 @@ footer{margin-top:18px;text-align:center;font-size:11.5px;color:var(--muted);fon
       </div>
     </section>
   </div>
+  </div>
+
+  <!-- Notizen -->
+  <div class="view" id="v-notes">
+    <section class="tile" style="--c:var(--blue)">
+      <div class="tag">📝 Notizen <span class="count" id="nCount">0</span></div>
+      <input class="inp" id="nSearch" placeholder="🔍 Notizen durchsuchen …" style="width:100%">
+      <div class="list" id="nList"></div>
+    </section>
+    <section class="tile" style="--c:var(--accent2);margin-top:14px">
+      <div class="tag">💾 Sicherung</div>
+      <div class="hint" style="margin:0 0 10px">Notizen, Aufgaben und Fotos sind nur auf <b>diesem Gerät</b> gespeichert. Lade ab und zu eine Sicherung herunter – damit kannst du alles auch auf ein anderes Gerät holen.</div>
+      <div class="row">
+        <button class="btn green" id="bkDown">⬇ Sicherung herunterladen</button>
+        <label class="btn ghost">⬆ Sicherung laden<input type="file" id="bkIn" accept=".json,application/json" hidden></label>
+      </div>
+      <div class="changes" id="bkInfo"></div>
+    </section>
+  </div>
+
+  <!-- Aufgaben -->
+  <div class="view" id="v-todo">
+    <section class="tile" style="--c:var(--accent2)">
+      <div class="tag">✅ Aufgaben <span class="count" id="tCount">0 offen</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input class="inp" id="tNew" placeholder="Neue Aufgabe …" style="flex:1;min-width:180px">
+        <input class="inp" id="tDue" type="date" title="Fällig am (optional)" style="width:150px">
+        <button class="btn green" id="tAdd">＋ Hinzufügen</button>
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px"><input type="checkbox" id="tShowDone"> Erledigte anzeigen</label>
+        <button class="btn ghost" id="tClear" style="padding:7px 10px;font-size:12.5px">🧹 Erledigte löschen</button>
+      </div>
+      <div class="list" id="tList"></div>
+    </section>
+  </div>
+
   <footer>Kompass Dark · Bayazit Diktiergerät</footer>
 </div>
 
+<nav class="tabs">
+  <button data-v="v-cap" class="on" style="--tc:var(--accent)"><span>🎙</span>Erfassen</button>
+  <button data-v="v-notes" style="--tc:var(--blue)"><span>📝</span><div>Notizen<b class="badge" id="bN" style="display:none"></b></div></button>
+  <button data-v="v-todo" style="--tc:var(--accent2)"><span>✅</span><div>Aufgaben<b class="badge" id="bT" style="display:none"></b></div></button>
+</nav>
+<div class="imgview" id="imgView"><img id="imgBig" alt="Foto"></div>
+<div class="modal" id="editM"><div class="box" style="max-width:560px">
+  <h3>Notiz bearbeiten</h3>
+  <textarea id="editTa" style="min-height:240px"></textarea>
+  <div class="row"><button class="btn ghost" id="eNo">Abbrechen</button><button class="btn" id="eYes">Speichern</button></div>
+</div></div>
 <div class="toast" id="toast">Kopiert ✓</div>
 <div class="modal" id="modal"><div class="box">
   <h3>Text löschen?</h3><p>Der gesamte Text und die Korrektur werden entfernt.</p>
@@ -395,6 +499,207 @@ $('copyFix').onclick=()=>copy(fixed);
 $('clearBtn').onclick=()=>$('modal').classList.add('show');
 $('mNo').onclick=()=>$('modal').classList.remove('show');
 $('mYes').onclick=()=>{ta.value='';upd();showFixed('','');out.textContent='Der korrigierte Text erscheint hier.';out.classList.add('empty');$('modal').classList.remove('show')};
+
+/* =========================================================
+   Speicher für Notizen, Aufgaben, Fotos (IndexedDB, Ersatz: localStorage)
+   ========================================================= */
+const DB={db:null,
+ open(){return new Promise(r=>{try{const q=indexedDB.open('diktat',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>{this.db=q.result;r()};q.onerror=()=>r()}catch(e){r()}})},
+ get(k){if(!this.db){try{return Promise.resolve(JSON.parse(localStorage.getItem('db_'+k)))}catch(e){return Promise.resolve(null)}}
+  return new Promise(r=>{try{const q=this.db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result??null);q.onerror=()=>r(null)}catch(e){r(null)}})},
+ set(k,v){if(!this.db){try{localStorage.setItem('db_'+k,JSON.stringify(v))}catch(e){toast('Speicher voll!')}return Promise.resolve()}
+  return new Promise(r=>{try{const t=this.db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=r;t.onerror=r}catch(e){r()}})},
+ del(k){if(!this.db){try{localStorage.removeItem('db_'+k)}catch(e){}return Promise.resolve()}
+  return new Promise(r=>{try{const t=this.db.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=r;t.onerror=r}catch(e){r()}})}
+};
+let notes=[], todos=[];
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const fdt=ts=>new Date(ts).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const fd=s=>s?new Date(s+'T12:00').toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'}):'';
+const saveNotes=()=>DB.set('notes',notes), saveTodos=()=>DB.set('todos',todos);
+
+/* ---------- Reiter ---------- */
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id===v));document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));store.set('diktat_view',v);window.scrollTo(0,0);
+  if(v==='v-notes')renderNotes(); if(v==='v-todo')renderTodos()}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>showView(b.dataset.v));
+function badges(){const n=notes.length,t=todos.filter(x=>!x.done).length;
+  $('bN').style.display=n?'':'none';$('bN').textContent=n;$('bT').style.display=t?'':'none';$('bT').textContent=t}
+
+/* ---------- KI-Aufruf (gemeinsam) ---------- */
+async function askClaude(system,content,maxTok){
+  const key=store.get('diktat_kikey'); if(!key) throw new Error('Kein KI-Schlüssel');
+  let r;
+  try{ r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+    headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-haiku-5-5',max_tokens:maxTok||2000,system,messages:[{role:'user',content}]})}) }
+  catch(e){throw new Error('KI nicht erreichbar – Internet prüfen.')}
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){const raw=(j&&j.error&&j.error.message)||'';
+    throw new Error(r.status===401?'Schlüssel ungültig – bitte prüfen.':r.status===429?'Zu viele Anfragen – kurz warten.':/credit|balance/i.test(raw)?'Guthaben leer – bitte bei Anthropic aufladen.':'KI-Fehler '+r.status+': '+raw)}
+  return (j.content||[]).map(c=>c.text||'').join('').trim();
+}
+
+/* ---------- Handschrift scannen ---------- */
+let pending=[]; // {id, big (base64 für KI), small (dataURL zum Speichern)}
+function shrink(file,max,q){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',q))};
+  im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u})}
+async function addPhotos(files){
+  for(const f of files){try{pending.push({id:uid(),big:(await shrink(f,1600,0.85)).split(',')[1],small:await shrink(f,1000,0.7)})}catch(e){toast('Bild konnte nicht gelesen werden')}}
+  renderPending();
+}
+function renderPending(){
+  $('scanBox').style.display=pending.length?'':'none';
+  $('pend').innerHTML=pending.map((p,i)=>`<div class="th" data-i="${i}"><img src="${p.small}" alt="Seite ${i+1}"><b data-x="${i}">✕</b></div>`).join('');
+  $('scanBtn').textContent=pending.length>1?'🔎 '+pending.length+' Seiten lesen':'🔎 Handschrift lesen';
+}
+$('pend').onclick=e=>{const x=e.target.closest('[data-x]');if(x){pending.splice(+x.dataset.x,1);renderPending();return}
+  const t=e.target.closest('.th');if(t)bigImg(pending[+t.dataset.i].small)};
+$('camBtn').onclick=()=>$('camIn').click(); $('galBtn').onclick=()=>$('galIn').click();
+$('camIn').onchange=e=>{addPhotos([...e.target.files]);e.target.value=''};
+$('galIn').onchange=e=>{addPhotos([...e.target.files]);e.target.value=''};
+$('scanClr').onclick=()=>{pending=[];renderPending()};
+$('scanBtn').onclick=async()=>{
+  if(!pending.length)return;
+  if(!store.get('diktat_kikey')){toast('Zum Lesen der Handschrift KI-Schlüssel einstellen 🔑');$('kiBox').open=true;$('kiBox').scrollIntoView({behavior:'smooth'});return}
+  const b=$('scanBtn');b.disabled=true;b.innerHTML='<span class="spin"></span> Lese Handschrift …';$('scanInfo').style.color='';
+  try{
+    const content=pending.map(p=>({type:'image',source:{type:'base64',media_type:'image/jpeg',data:p.big}}));
+    content.push({type:'text',text:(pending.length>1?'Das sind '+pending.length+' Seiten in dieser Reihenfolge. ':'')+'Lies den Text ab.'});
+    const t=await askClaude('Du liest handschriftliche (oder gedruckte) Notizen von Fotos ab, meist auf Deutsch. Gib NUR den abgelesenen Text wieder – Zeilenumbrüche, Absätze, Aufzählungen und Listen beibehalten. Korrigiere offensichtliche Rechtschreibfehler nicht stillschweigend weg, sondern gib wieder, was gemeint ist. Wörter, die du nicht sicher lesen kannst, markierst du mit [?] direkt dahinter. Mehrere Seiten trennst du mit einer Leerzeile. Keine Einleitung, keine Erklärung. Ist kein Text erkennbar, antworte nur: (kein Text erkannt)',content,4000);
+    ta.value=ta.value.trim()?ta.value.trim()+'\n\n'+t:t; upd();
+    const unsure=(t.match(/\[\?\]/g)||[]).length;
+    $('scanInfo').textContent='✓ Gelesen'+(unsure?' – '+unsure+' unsichere Stelle'+(unsure>1?'n':'')+' mit [?] markiert, bitte prüfen.':'.')+' Die Fotos werden beim Speichern an die Notiz gehängt.';
+    toast('Handschrift gelesen ✓'); ta.scrollIntoView({behavior:'smooth',block:'center'});
+  }catch(e){$('scanInfo').textContent='⚠ '+e.message;$('scanInfo').style.color='var(--accent)'}
+  finally{b.disabled=false;renderPending()}
+};
+function bigImg(src){$('imgBig').src=src;$('imgView').classList.add('show')}
+$('imgView').onclick=()=>$('imgView').classList.remove('show');
+
+/* ---------- Speichern als Notiz / Aufgabe ---------- */
+function currentText(){return (fixed||ta.value).trim()}
+function resetCapture(){ta.value='';upd();showFixed('','');out.textContent='Der korrigierte Text erscheint hier.';out.classList.add('empty');pending=[];renderPending();$('scanInfo').textContent='Tipp: Mehrere Seiten nacheinander fotografieren – sie werden zu einem Text zusammengefasst.';$('scanInfo').style.color=''}
+$('saveNote').onclick=async()=>{
+  const t=currentText(); if(!t&&!pending.length){toast('Nichts zum Speichern');return}
+  const photos=[];
+  for(const p of pending){const k='foto_'+p.id;await DB.set(k,p.small);photos.push(k)}
+  notes.unshift({id:uid(),text:t,ts:Date.now(),pin:false,photos});
+  await saveNotes(); badges(); resetCapture(); toast('Als Notiz gespeichert 📝');
+};
+$('saveTodo').onclick=async()=>{
+  const t=currentText(); if(!t){toast('Erst etwas diktieren oder scannen');return}
+  const b=$('saveTodo'); let items=null;
+  if(store.get('diktat_kikey')&&t.length>25){
+    b.disabled=true;b.innerHTML='<span class="spin"></span> Suche Aufgaben …';
+    try{
+      const r=await askClaude('Du ziehst aus einem deutschen Text alle Aufgaben/To-dos heraus. Heute ist '+today()+' ('+new Date().toLocaleDateString('de-DE',{weekday:'long'})+'). Antworte NUR mit einem JSON-Array, z. B. [{"text":"Reifen wechseln lassen","faellig":"2026-11-26","wichtig":false}]. "text" kurz und klar als Aufgabe formuliert. "faellig" nur wenn ein Datum/Tag genannt ist (sonst null). "wichtig" true nur wenn es als dringend/wichtig genannt ist. Gibt es nur eine Aufgabe, ein Array mit einem Eintrag.',t,1500);
+      const m=r.match(/\[[\s\S]*\]/); const a=m&&JSON.parse(m[0]);
+      if(Array.isArray(a)&&a.length) items=a.filter(x=>x&&x.text).map(x=>({text:String(x.text).trim(),due:/^\d{4}-\d{2}-\d{2}$/.test(x.faellig||'')?x.faellig:'',imp:!!x.wichtig}));
+    }catch(e){toast('KI: '+e.message+' – als eine Aufgabe gespeichert')}
+    finally{b.disabled=false;b.innerHTML='✅ Als Aufgabe'}
+  }
+  if(!items||!items.length) items=[{text:t,due:'',imp:false}];
+  items.reverse().forEach(x=>todos.unshift({id:uid(),text:x.text,due:x.due,imp:x.imp,done:false,ts:Date.now()}));
+  await saveTodos(); badges(); resetCapture();
+  toast(items.length>1?items.length+' Aufgaben angelegt ✅':'Aufgabe angelegt ✅');
+};
+
+/* ---------- Notizen anzeigen ---------- */
+const photoCache={};
+async function photo(k){if(!(k in photoCache))photoCache[k]=await DB.get(k);return photoCache[k]}
+async function renderNotes(){
+  const q=$('nSearch').value.trim().toLowerCase();
+  const list=notes.filter(n=>!q||n.text.toLowerCase().includes(q)).sort((a,b)=>(b.pin-a.pin)||(b.ts-a.ts));
+  $('nCount').textContent=notes.length+(notes.length===1?' Notiz':' Notizen');
+  if(!list.length){$('nList').innerHTML=`<div class="empty-st">${notes.length?'Nichts gefunden.':'Noch keine Notizen.<br>Im Reiter <b>🎙 Erfassen</b> diktieren oder Handschrift scannen und auf <b>„💾 Als Notiz speichern“</b> tippen.'}</div>`;return}
+  $('nList').innerHTML=list.map(n=>`<div class="note ${n.pin?'pin':''}" data-id="${n.id}">
+    <div class="meta"><span>${n.pin?'📌 ':''}${fdt(n.ts)}${n.edited?' · bearbeitet':''}</span><span>${n.photos&&n.photos.length?'📷 '+n.photos.length:''}</span></div>
+    <div class="body" data-a="open">${esc(n.text)||'<i style="color:var(--muted)">(nur Foto)</i>'}</div>
+    ${n.photos&&n.photos.length?`<div class="thumbs">${n.photos.map(k=>`<div class="th" data-ph="${k}"><img alt="Foto"></div>`).join('')}</div>`:''}
+    <div class="acts"><button data-a="pin">${n.pin?'📌 Lösen':'📌 Anheften'}</button><button data-a="edit">✏ Bearbeiten</button><button data-a="copy">📋</button><button data-a="say">🔊</button><button data-a="todo">✅ Aufgabe</button><button data-a="del" class="del">🗑</button></div>
+  </div>`).join('');
+  for(const el of $('nList').querySelectorAll('[data-ph]')){const src=await photo(el.dataset.ph);if(src)el.querySelector('img').src=src}
+}
+$('nSearch').oninput=renderNotes;
+let editId=null;
+$('nList').onclick=async e=>{
+  const ph=e.target.closest('[data-ph]'); if(ph){const s=await photo(ph.dataset.ph);if(s)bigImg(s);return}
+  const btn=e.target.closest('[data-a]'); if(!btn)return;
+  const card=btn.closest('.note'), n=notes.find(x=>x.id===card.dataset.id); if(!n)return;
+  const a=btn.dataset.a;
+  if(a==='open'){card.classList.toggle('open');return}
+  if(a==='pin'){n.pin=!n.pin;await saveNotes();renderNotes()}
+  if(a==='edit'){editId=n.id;$('editTa').value=n.text;$('editM').classList.add('show')}
+  if(a==='copy')copy(n.text);
+  if(a==='say')speak('note'+n.id,n.text);
+  if(a==='todo'){todos.unshift({id:uid(),text:n.text.split('\n')[0].slice(0,200),due:'',imp:false,done:false,ts:Date.now()});await saveTodos();badges();toast('Als Aufgabe angelegt ✅')}
+  if(a==='del'){
+    if(!btn.classList.contains('sure')){btn.classList.add('sure');btn.textContent='Wirklich löschen?';setTimeout(()=>{btn.classList.remove('sure');btn.textContent='🗑'},3500);return}
+    for(const k of n.photos||[]){await DB.del(k);delete photoCache[k]}
+    notes=notes.filter(x=>x.id!==n.id);await saveNotes();badges();renderNotes();toast('Notiz gelöscht')}
+};
+$('eNo').onclick=()=>$('editM').classList.remove('show');
+$('eYes').onclick=async()=>{const n=notes.find(x=>x.id===editId);if(n){n.text=$('editTa').value.trim();n.edited=Date.now();await saveNotes();renderNotes()}$('editM').classList.remove('show');toast('Gespeichert ✓')};
+
+/* ---------- Aufgaben ---------- */
+function renderTodos(){
+  const show=$('tShowDone').checked, t0d=today();
+  const open=todos.filter(x=>!x.done).length;
+  $('tCount').textContent=open+' offen';
+  const list=todos.filter(x=>show||!x.done).sort((a,b)=>(a.done-b.done)||(b.imp-a.imp)||((a.due||'9999')<(b.due||'9999')?-1:(a.due||'9999')>(b.due||'9999')?1:0)||(b.ts-a.ts));
+  if(!list.length){$('tList').innerHTML=`<div class="empty-st">${todos.length?'Alles erledigt 🎉':'Noch keine Aufgaben.<br>Oben eintippen – oder im Reiter <b>🎙 Erfassen</b> diktieren und <b>„✅ Als Aufgabe“</b> tippen.'}</div>`;return}
+  $('tList').innerHTML=list.map(x=>{const late=x.due&&!x.done&&x.due<t0d, tod=x.due===t0d;
+    return `<div class="todo ${x.done?'done':''} ${x.imp&&!x.done?'imp':''}" data-id="${x.id}">
+    <button class="ck" data-a="ck">${x.done?'✓':''}</button>
+    <div class="tx"><div class="tt">${x.imp?'⭐ ':''}${esc(x.text)}</div>${x.due?`<div class="due ${late?'late':tod?'today':''}">📅 ${tod?'Heute':fd(x.due)}${late?' · überfällig':''}</div>`:''}</div>
+    <div class="side"><button class="mini" data-a="imp" title="Wichtig">${x.imp?'★':'☆'}</button><button class="mini" data-a="say" title="Vorlesen">🔊</button><button class="mini" data-a="del" title="Löschen">🗑</button></div></div>`}).join('');
+}
+async function addTodo(){const t=$('tNew').value.trim();if(!t){$('tNew').focus();return}
+  todos.unshift({id:uid(),text:t,due:$('tDue').value||'',imp:false,done:false,ts:Date.now()});$('tNew').value='';$('tDue').value='';await saveTodos();badges();renderTodos()}
+$('tAdd').onclick=addTodo; $('tNew').onkeydown=e=>{if(e.key==='Enter')addTodo()};
+$('tShowDone').onchange=renderTodos;
+$('tClear').onclick=async()=>{const n=todos.filter(x=>x.done).length;if(!n){toast('Keine erledigten Aufgaben');return}
+  const b=$('tClear');if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent=n+' löschen? Nochmal tippen';setTimeout(()=>{b.classList.remove('sure');b.textContent='🧹 Erledigte löschen'},3500);return}
+  b.classList.remove('sure');b.textContent='🧹 Erledigte löschen';todos=todos.filter(x=>!x.done);await saveTodos();badges();renderTodos();toast(n+' gelöscht')};
+$('tList').onclick=async e=>{
+  const btn=e.target.closest('[data-a]');if(!btn)return;const x=todos.find(t=>t.id===btn.closest('.todo').dataset.id);if(!x)return;
+  const a=btn.dataset.a;
+  if(a==='ck'){x.done=!x.done;x.doneTs=x.done?Date.now():null;if(x.done)toast('Erledigt ✓')}
+  if(a==='imp')x.imp=!x.imp;
+  if(a==='say'){speak('todo'+x.id,x.text);return}
+  if(a==='del'){if(!btn.classList.contains('sure')){btn.classList.add('sure');btn.textContent='?';setTimeout(()=>{btn.classList.remove('sure');btn.textContent='🗑'},3000);return}todos=todos.filter(t=>t.id!==x.id)}
+  await saveTodos();badges();renderTodos();
+};
+
+/* ---------- Sicherung ---------- */
+$('bkDown').onclick=async()=>{
+  const photos={};for(const n of notes)for(const k of n.photos||[]){photos[k]=await photo(k)}
+  const data=JSON.stringify({app:'diktat',version:1,datum:new Date().toISOString(),notes,todos,photos});
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='diktat-sicherung-'+today()+'.json';document.body.appendChild(a);a.click();a.remove();
+    $('bkInfo').textContent='✓ Sicherung heruntergeladen ('+notes.length+' Notizen, '+todos.length+' Aufgaben, '+Object.keys(photos).length+' Fotos).'}
+  catch(e){$('bkInfo').textContent='Herunterladen ging nicht.'}
+};
+$('bkIn').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());if(d.app!=='diktat')throw 0;
+    const haveN=new Set(notes.map(x=>x.id)),haveT=new Set(todos.map(x=>x.id));let nn=0,nt=0;
+    for(const [k,v] of Object.entries(d.photos||{})){if(v){await DB.set(k,v);photoCache[k]=v}}
+    for(const n of d.notes||[])if(!haveN.has(n.id)){notes.push(n);nn++}
+    for(const t of d.todos||[])if(!haveT.has(t.id)){todos.push(t);nt++}
+    await saveNotes();await saveTodos();badges();renderNotes();
+    $('bkInfo').textContent='✓ Sicherung geladen: '+nn+' Notizen und '+nt+' Aufgaben neu dazugekommen (Vorhandenes bleibt erhalten).';
+  }catch(err){$('bkInfo').textContent='❌ Diese Datei ist keine Diktiergerät-Sicherung.'}
+};
+
+/* ---------- Start ---------- */
+(async()=>{await DB.open();notes=(await DB.get('notes'))||[];todos=(await DB.get('todos'))||[];badges();
+  const v=store.get('diktat_view');if(v&&$(v))showView(v);
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}})();
+
 if("serviceWorker" in navigator&&location.protocol==="https:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 </script>
 </body>

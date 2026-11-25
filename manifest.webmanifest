@@ -1,7 +1,7 @@
 {
   "name": "Bayazit Diktiergerät",
   "short_name": "Diktat",
-  "description": "Sprechen, korrigieren und Text kopieren",
+  "description": "Diktieren, Handschrift scannen, Notizen und Aufgaben",
   "lang": "de",
   "id": "/",
   "start_url": "/",
